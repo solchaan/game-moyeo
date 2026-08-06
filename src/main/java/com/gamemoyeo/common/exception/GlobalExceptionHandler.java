@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.dao.DataIntegrityViolationException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -46,6 +47,18 @@ public class GlobalExceptionHandler {
             HttpStatus.BAD_REQUEST, "CONSTRAINT_VIOLATION", "Request constraint was violated.",
             request.getRequestURI());
         return ResponseEntity.badRequest().body(problem);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    ResponseEntity<ProblemDetail> handleDataIntegrityViolation(
+        DataIntegrityViolationException exception,
+        HttpServletRequest request
+    ) {
+        log.warn("Database constraint violation: {}", exception.getMostSpecificCause().getMessage());
+        ProblemDetail problem = createProblem(
+            HttpStatus.CONFLICT, "RESOURCE_CONFLICT", "The resource conflicts with existing data.",
+            request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(problem);
     }
 
     @ExceptionHandler(Exception.class)

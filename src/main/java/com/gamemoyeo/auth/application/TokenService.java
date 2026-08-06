@@ -1,6 +1,7 @@
 package com.gamemoyeo.auth.application;
 
 import com.gamemoyeo.auth.application.port.out.RefreshTokenPort;
+import com.gamemoyeo.auth.application.port.out.MemberAuthorityPort;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -22,6 +23,7 @@ public class TokenService {
 
     private final JwtEncoder jwtEncoder;
     private final RefreshTokenPort refreshTokenPort;
+    private final MemberAuthorityPort memberAuthorityPort;
     private final String issuer;
     private final String audience;
     private final Duration accessTtl;
@@ -31,6 +33,7 @@ public class TokenService {
     public TokenService(
         JwtEncoder jwtEncoder,
         RefreshTokenPort refreshTokenPort,
+        MemberAuthorityPort memberAuthorityPort,
         @Value("${app.token.issuer}") String issuer,
         @Value("${app.token.audience}") String audience,
         @Value("${app.token.access-token-ttl}") Duration accessTtl,
@@ -38,6 +41,7 @@ public class TokenService {
     ) {
         this.jwtEncoder = jwtEncoder;
         this.refreshTokenPort = refreshTokenPort;
+        this.memberAuthorityPort = memberAuthorityPort;
         this.issuer = issuer;
         this.audience = audience;
         this.accessTtl = accessTtl;
@@ -54,7 +58,7 @@ public class TokenService {
             .issuedAt(now)
             .expiresAt(now.plus(accessTtl))
             .id(UUID.randomUUID().toString())
-            .claim("roles", java.util.List.of("MEMBER"))
+            .claim("roles", java.util.List.of(memberAuthorityPort.findRole(memberId)))
             .build();
         String accessToken = jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
 

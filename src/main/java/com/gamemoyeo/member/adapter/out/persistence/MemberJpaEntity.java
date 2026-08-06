@@ -26,6 +26,9 @@ public class MemberJpaEntity {
     @Column(nullable = false, length = 20)
     private String status = "ACTIVE";
 
+    @Column(nullable = false, length = 20)
+    private String role = "MEMBER";
+
     protected MemberJpaEntity() {
     }
 
@@ -41,5 +44,9 @@ public class MemberJpaEntity {
 
     public String getStatus() {
         return status;
+    }
+
+    public String getRole() {
+        return role;
     }
 }
