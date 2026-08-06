@@ -1,0 +1,122 @@
+spring:
+  application:
+    name: game-moyeo-api
+  datasource:
+    url: ${DB_URL:jdbc:mariadb://localhost:3306/gamemoyeo}
+    username: ${DB_USERNAME:gamemoyeo}
+    password: ${DB_PASSWORD:local_password}
+    hikari:
+      maximum-pool-size: ${DB_POOL_MAX_SIZE:20}
+      minimum-idle: ${DB_POOL_MIN_IDLE:5}
+      connection-timeout: 3000
+      validation-timeout: 1000
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+        default_batch_fetch_size: 100
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  jooq:
+    sql-dialect: mariadb
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      timeout: 2s
+  session:
+    store-type: redis
+    timeout: 10m
+    redis:
+      namespace: gamemoyeo:session
+  mvc:
+    problemdetails:
+      enabled: true
+
+app:
+  security:
+    enabled: ${SECURITY_ENABLED:false}
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:5173}
+  social-login:
+    enabled: false
+    success-redirect-uri: ${LOGIN_SUCCESS_REDIRECT_URI:http://localhost:5173/oauth/callback}
+    login-code-ttl: 60s
+  token:
+    issuer: game-moyeo-api
+    audience: game-moyeo-spa
+    access-token-ttl: 15m
+    refresh-token-ttl: 30d
+    # Production must override this with at least 32 random bytes.
+    secret: ${JWT_SECRET:local-development-secret-change-me-32bytes}
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        sliding-window-size: 20
+        minimum-number-of-calls: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+  retry:
+    configs:
+      default:
+        max-attempts: 3
+        wait-duration: 200ms
+        enable-exponential-backoff: true
+        exponential-backoff-multiplier: 2
+  bulkhead:
+    configs:
+      default:
+        max-concurrent-calls: 50
+        max-wait-duration: 0
+  timelimiter:
+    configs:
+      default:
+        timeout-duration: 3s
+  ratelimiter:
+    configs:
+      default:
+        limit-for-period: 100
+        limit-refresh-period: 1s
+        timeout-duration: 0
+
+server:
+  shutdown: graceful
+  compression:
+    enabled: true
+  error:
+    include-message: never
+    include-stacktrace: never
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: never
+  metrics:
+    tags:
+      application: ${spring.application.name}
+  tracing:
+    sampling:
+      probability: ${TRACING_SAMPLE_RATE:0.1}
+
+logging:
+  pattern:
+    level: "%5p [traceId=%X{traceId:-}]"

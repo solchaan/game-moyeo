@@ -1,0 +1,116 @@
+plugins {
+    id 'java'
+    id 'checkstyle'
+    id 'org.springframework.boot' version '3.5.16'
+    id 'io.spring.dependency-management' version '1.1.7'
+    id 'org.jooq.jooq-codegen-gradle' version '3.19.32'
+}
+
+group = 'com.gamemoyeo'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+repositories {
+    mavenCentral()
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-aop'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation 'org.springframework.session:spring-session-data-redis'
+    implementation 'org.springframework.boot:spring-boot-starter-jooq'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+    implementation 'org.springframework.kafka:spring-kafka'
+
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.17'
+    implementation 'io.github.resilience4j:resilience4j-spring-boot3:2.3.0'
+
+    implementation 'org.flywaydb:flyway-core'
+    implementation 'org.flywaydb:flyway-mysql'
+    runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
+    runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
+    runtimeOnly 'io.micrometer:micrometer-tracing-bridge-otel'
+    runtimeOnly 'io.micrometer:micrometer-registry-otlp'
+
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+
+    jooqCodegen 'org.mariadb.jdbc:mariadb-java-client'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+    testImplementation 'org.testcontainers:junit-jupiter'
+    testImplementation 'org.testcontainers:mariadb'
+    testImplementation 'org.testcontainers:kafka'
+    testImplementation 'com.tngtech.archunit:archunit-junit5:1.4.1'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+checkstyle {
+    toolVersion = '10.26.1'
+    configFile = file('config/checkstyle/checkstyle.xml')
+}
+
+jooq {
+    configuration {
+        jdbc {
+            driver = 'org.mariadb.jdbc.Driver'
+            url = providers.environmentVariable('DB_URL')
+                .orElse('jdbc:mariadb://localhost:3306/gamemoyeo')
+                .get()
+            user = providers.environmentVariable('DB_USERNAME').orElse('gamemoyeo').get()
+            password = providers.environmentVariable('DB_PASSWORD').orElse('local_password').get()
+        }
+        generator {
+            database {
+                name = 'org.jooq.meta.mariadb.MariaDBDatabase'
+                inputSchema = 'gamemoyeo'
+                includes = '.*'
+            }
+            generate {
+                deprecated = false
+                records = true
+                pojos = false
+                daos = false
+            }
+            target {
+                packageName = 'com.gamemoyeo.generated.jooq'
+                directory = 'build/generated-src/jooq/main'
+            }
+        }
+    }
+}
+
+sourceSets {
+    main.java.srcDir 'build/generated-src/jooq/main'
+}
+
+tasks.named('jooqCodegen') {
+    // Opt in because generation requires a running, migrated MariaDB instance.
+    onlyIf { providers.environmentVariable('JOOQ_CODEGEN').orElse('false').get().toBoolean() }
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = 21
+    options.compilerArgs += ['-parameters']
+}
