@@ -38,6 +38,12 @@ public class MemberJpaEntity {
         this.profileImageUrl = profileImageUrl;
     }
 
+    public static MemberJpaEntity localAdmin(String username) {
+        MemberJpaEntity member = new MemberJpaEntity(username, null, null);
+        member.role = "ADMIN";
+        return member;
+    }
+
     public Long getId() {
         return id;
     }

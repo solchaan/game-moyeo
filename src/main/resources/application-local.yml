@@ -4,6 +4,25 @@ spring:
       hibernate:
         format_sql: true
 
+app:
+  admin:
+    bootstrap:
+      enabled: ${ADMIN_BOOTSTRAP_ENABLED:false}
+      username: ${ADMIN_BOOTSTRAP_USERNAME:}
+      password: ${ADMIN_BOOTSTRAP_PASSWORD:}
+
 logging:
   level:
     org.hibernate.SQL: debug
+
+management:
+  otlp:
+    metrics:
+      export:
+        enabled: false
+    tracing:
+      export:
+        enabled: false
+    logging:
+      export:
+        enabled: false
