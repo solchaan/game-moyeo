@@ -1,0 +1,24 @@
+import type { CursorPage, Game, GameDetail, GamePayload, Meetup, MeetupPayload, Problem, TokenPair } from './types'
+import { getAccessToken } from './auth'
+
+const base = import.meta.env.VITE_API_BASE_URL ?? ''
+export class ApiError extends Error { constructor(public status:number, public problem:Problem){super(problem.detail || problem.title || '요청을 처리하지 못했습니다.')} }
+async function request<T>(path:string, init:RequestInit = {}):Promise<T> {
+  const token = getAccessToken()
+  const response = await fetch(`${base}${path}`, { ...init, signal:init.signal??AbortSignal.timeout(10_000), headers:{'Content-Type':'application/json', ...(token?{Authorization:`Bearer ${token}`} : {}), ...init.headers} })
+  if (!response.ok) { let problem:Problem={}; try{problem=await response.json()}catch{problem={detail:`HTTP ${response.status}`}}; throw new ApiError(response.status,problem) }
+  if (response.status===204) return undefined as T
+  return response.json()
+}
+export const api = {
+  games:()=>request<Game[]>('/api/v1/games'),
+  game:(id:number)=>request<GameDetail>(`/api/v1/games/${id}`),
+  createGame:(body:GamePayload)=>request<Game>('/api/v1/admin/games',{method:'POST',headers:{'Idempotency-Key':crypto.randomUUID()},body:JSON.stringify(body)}),
+  meetups:(gameId?:number,cursor?:number)=>request<CursorPage<Meetup>>(`/api/v1/meetups?size=20${gameId?`&gameId=${gameId}`:''}${cursor?`&cursor=${cursor}`:''}`),
+  meetup:(id:number)=>request<Meetup>(`/api/v1/meetups/${id}`),
+  createMeetup:(body:MeetupPayload)=>request<Meetup>('/api/v1/meetups',{method:'POST',headers:{'Idempotency-Key':crypto.randomUUID()},body:JSON.stringify(body)}),
+  updateMeetup:(id:number,body:MeetupPayload)=>request<Meetup>(`/api/v1/meetups/${id}`,{method:'PUT',headers:{'Idempotency-Key':crypto.randomUUID()},body:JSON.stringify(body)}),
+  deleteMeetup:(id:number)=>request<void>(`/api/v1/meetups/${id}`,{method:'DELETE',headers:{'Idempotency-Key':crypto.randomUUID()}}),
+  exchange:(code:string)=>request<TokenPair>('/api/v1/auth/token',{method:'POST',body:JSON.stringify({code})}),
+  adminLogin:(username:string,password:string)=>request<TokenPair>('/api/v1/auth/admin/login',{method:'POST',body:JSON.stringify({username,password})}),
+}

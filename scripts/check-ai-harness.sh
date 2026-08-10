@@ -37,3 +37,5 @@ if [ "$missing" -ne 0 ]; then
 fi
 
 echo "AI harness policy check passed"
+
+"$root_dir/scripts/check-frontend-harness.sh"
