@@ -11,16 +11,17 @@ import java.time.Instant;
 public class RefreshTokenJpaEntity {
 
     @Id
-    @Column(length = 36)
+    @Column(length = 36, columnDefinition = "char(36)")
     private String id;
 
     @Column(name = "member_id", nullable = false)
     private long memberId;
 
-    @Column(name = "token_hash", nullable = false, length = 64, unique = true)
+    @Column(name = "token_hash", nullable = false, length = 64, unique = true,
+        columnDefinition = "char(64)")
     private String tokenHash;
 
-    @Column(name = "token_family", nullable = false, length = 36)
+    @Column(name = "token_family", nullable = false, length = 36, columnDefinition = "char(36)")
     private String tokenFamily;
 
     @Column(name = "issued_at", nullable = false)
