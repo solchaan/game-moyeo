@@ -10,6 +10,7 @@ import org.slf4j.MDC;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -59,6 +60,19 @@ public class GlobalExceptionHandler {
             HttpStatus.CONFLICT, "RESOURCE_CONFLICT", "The resource conflicts with existing data.",
             request.getRequestURI());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(problem);
+    }
+
+    @ExceptionHandler(AuthorizationDeniedException.class)
+    ResponseEntity<ProblemDetail> handleAuthorizationDenied(
+        AuthorizationDeniedException exception,
+        HttpServletRequest request
+    ) {
+        ProblemDetail problem = createProblem(
+            HttpStatus.FORBIDDEN,
+            "FORBIDDEN",
+            "You do not have permission to perform this action.",
+            request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(problem);
     }
 
     @ExceptionHandler(Exception.class)
