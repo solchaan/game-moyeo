@@ -1,5 +1,17 @@
 # game-moyeo
 
+## Repository structure
+
+```text
+gameMoyeo/
+├── backend/             # Spring Boot, Gradle, Flyway, JPA, jOOQ
+├── frontend/            # React, TypeScript, Vite
+├── scripts/             # 루트 실행 및 하네스 검사
+├── docs/                # 아키텍처 문서
+├── compose.yml          # 로컬 MariaDB, Redis, Kafka
+└── AGENTS.md            # 저장소 공통 AI 개발 규칙
+```
+
 ## Local run
 
 MariaDB가 이미 준비되어 있다면 Redis를 포함한 필요한 Homebrew 서비스를 확인하고 애플리케이션을 실행합니다.
@@ -14,7 +26,7 @@ MariaDB가 이미 준비되어 있다면 Redis를 포함한 필요한 Homebrew �
 ./scripts/run-local.sh
 ```
 
-Homebrew Redis 설정에 설치되지 않은 optional module이 남아 서비스 시작이 실패하면, 스크립트는 해당 서비스를 중지하고 `build/local-redis`에서 프로젝트 전용 Redis를 모듈 없이 실행합니다.
+Homebrew Redis 설정에 설치되지 않은 optional module이 남아 서비스 시작이 실패하면, 스크립트는 해당 서비스를 중지하고 `backend/build/local-redis`에서 프로젝트 전용 Redis를 모듈 없이 실행합니다.
 
 Docker가 설치된 환경에서는 MariaDB, Redis, Kafka를 Compose로 실행할 수 있습니다.
 
@@ -27,6 +39,14 @@ Docker가 설치된 환경에서는 MariaDB, Redis, Kafka를 Compose로 실행�
 ```bash
 cp .env.example .env
 ./scripts/run-local.sh
+```
+
+백엔드만 직접 실행하거나 검사할 때는 `backend` 디렉터리의 Gradle Wrapper를 사용합니다.
+
+```bash
+cd backend
+./gradlew bootRun --args='--spring.profiles.active=local'
+./gradlew clean check
 ```
 
 ## Frontend
@@ -50,5 +70,6 @@ cp frontend/.env.example frontend/.env
 ## AI harness
 
 - 백엔드와 저장소 공통 규칙: `AGENTS.md`
+- Spring Boot 프로젝트: `backend/`
 - React 프론트엔드 규칙: `frontend/AGENTS.md`
 - 전체 하네스 검사: `./scripts/check-ai-harness.sh`

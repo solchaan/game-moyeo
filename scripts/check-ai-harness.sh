@@ -3,11 +3,23 @@ set -eu
 
 root_dir=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 harness="$root_dir/AGENTS.md"
+backend_dir="$root_dir/backend"
 
 if [ ! -f "$harness" ]; then
   echo "ERROR: AGENTS.md AI harness is missing" >&2
   exit 1
 fi
+
+for backend_path in \
+  "$backend_dir/build.gradle" \
+  "$backend_dir/settings.gradle" \
+  "$backend_dir/gradlew" \
+  "$backend_dir/src/main/resources/db/migration"; do
+  if [ ! -e "$backend_path" ]; then
+    echo "ERROR: backend project path is missing: $backend_path" >&2
+    exit 1
+  fi
+done
 
 required_terms='Clean Architecture
 MariaDB

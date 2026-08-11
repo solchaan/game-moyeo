@@ -3,6 +3,7 @@ set -eu
 
 script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 project_dir=$(CDPATH= cd -- "$script_dir/.." && pwd)
+backend_dir="$project_dir/backend"
 
 use_docker=false
 install_missing=false
@@ -109,7 +110,7 @@ wait_for_port_quietly() {
 
 start_standalone_redis() {
   require_command redis-server
-  redis_runtime_dir="$project_dir/build/local-redis"
+  redis_runtime_dir="$backend_dir/build/local-redis"
   mkdir -p "$redis_runtime_dir"
 
   echo "Homebrew Redis service failed; starting a project-local Redis without optional modules..."
@@ -232,5 +233,5 @@ verify_redis
 echo "Starting gameMoyeo with Spring profile '$SPRING_PROFILES_ACTIVE'..."
 echo "Swagger UI: http://localhost:8080/swagger-ui.html"
 echo "Health:     http://localhost:8080/actuator/health"
-cd "$project_dir"
+cd "$backend_dir"
 exec ./gradlew bootRun --args="--spring.profiles.active=$SPRING_PROFILES_ACTIVE"

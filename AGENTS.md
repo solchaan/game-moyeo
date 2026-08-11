@@ -17,7 +17,7 @@
 - Redis: 캐시, rate limit, 짧은 수명의 분산 조정에만 사용. 예약 정합성의 유일한 근거로 사용하지 않는다.
 - OpenAPI 3, JSON REST API, Testcontainers, JUnit 5
 
-주의: jOOQ 자체는 DB 마이그레이션 도구가 아니다. DB 형상은 `src/main/resources/db/migration`의 Flyway SQL이 단일 원본이며, jOOQ 코드는 그 형상으로부터 생성한다. JPA의 `ddl-auto`는 `validate`만 허용한다.
+주의: jOOQ 자체는 DB 마이그레이션 도구가 아니다. DB 형상은 `backend/src/main/resources/db/migration`의 Flyway SQL이 단일 원본이며, jOOQ 코드는 그 형상으로부터 생성한다. JPA의 `ddl-auto`는 `validate`만 허용한다.
 
 ## 3. Clean Architecture 의존성 규칙
 
@@ -117,7 +117,7 @@ WHERE id = :sessionId
 - DB 관련 변경은 MariaDB Testcontainers integration test와 Flyway migration test를 포함한다.
 - 예약 변경은 중복, 정원 경계, 취소, idempotency, 50개 이상의 동시 요청을 검증한다.
 - ArchUnit으로 의존성 방향을 강제한다.
-- 완료 전 `./gradlew clean test`와 jOOQ code generation/compile을 실행하고 결과를 보고한다.
+- 완료 전 `cd backend && ./gradlew clean test`와 jOOQ code generation/compile을 실행하고 결과를 보고한다.
 
 ## 9. AI 작업 절차
 
@@ -130,3 +130,10 @@ WHERE id = :sessionId
 7. 사용자 추가 요청 사항이 코드 재사용, 리팩토링 가능한 구조라면 사용자에게 즉시 문의한다.
 
 아키텍처 규칙을 어겨야 한다면 조용히 우회하지 말고 이유와 대안을 ADR로 남긴다.
+
+## 10. Git 커밋 메시지
+
+- 모든 커밋 제목은 Conventional Commits 타입을 앞에 표기한다.
+- 타입 뒤 설명은 한글로 작성한다. 예: `feat: 관리자 로그인 추가`, `fix: JWT 권한 변환 수정`, `chore: 백엔드 디렉터리 구조 정리`.
+- 주로 `feat`, `fix`, `refactor`, `test`, `docs`, `chore`, `build`, `ci`를 사용하며 변경 목적과 가장 정확히 일치하는 타입을 선택한다.
+- 서로 다른 논리적 변경은 가능한 한 별도 커밋으로 분리한다.
