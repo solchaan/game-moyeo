@@ -1,0 +1,171 @@
+{
+  "asOf": "2026-05-31",
+  "selectionBasis": "한국 PC방 사용 순위와 파티 모집 적합성",
+  "games": [
+    {
+      "slug": "league-of-legends",
+      "name": "리그 오브 레전드",
+      "description": "5명이 역할을 나눠 협력하는 라이엇 게임즈의 팀 기반 MOBA 게임",
+      "imageUrl": null,
+      "options": [
+        {"type":"MODE","code":"NORMAL_DRAFT","displayName":"일반 교차 선택","sortOrder":10,"metadata":null},
+        {"type":"MODE","code":"RANKED_SOLO","displayName":"개인/2인 랭크","sortOrder":20,"metadata":null},
+        {"type":"MODE","code":"RANKED_FLEX","displayName":"자유 랭크","sortOrder":30,"metadata":null},
+        {"type":"MODE","code":"ARAM","displayName":"무작위 총력전","sortOrder":40,"metadata":null},
+        {"type":"ROLE","code":"TOP","displayName":"탑","sortOrder":10,"metadata":null},
+        {"type":"ROLE","code":"JUNGLE","displayName":"정글","sortOrder":20,"metadata":null},
+        {"type":"ROLE","code":"MID","displayName":"미드","sortOrder":30,"metadata":null},
+        {"type":"ROLE","code":"BOTTOM","displayName":"바텀","sortOrder":40,"metadata":null},
+        {"type":"ROLE","code":"SUPPORT","displayName":"서포터","sortOrder":50,"metadata":null},
+        {"type":"TIER","code":"IRON","displayName":"아이언","sortOrder":10,"metadata":null},
+        {"type":"TIER","code":"BRONZE","displayName":"브론즈","sortOrder":20,"metadata":null},
+        {"type":"TIER","code":"SILVER","displayName":"실버","sortOrder":30,"metadata":null},
+        {"type":"TIER","code":"GOLD","displayName":"골드","sortOrder":40,"metadata":null},
+        {"type":"TIER","code":"PLATINUM","displayName":"플래티넘","sortOrder":50,"metadata":null},
+        {"type":"TIER","code":"EMERALD","displayName":"에메랄드","sortOrder":60,"metadata":null},
+        {"type":"TIER","code":"DIAMOND","displayName":"다이아몬드","sortOrder":70,"metadata":null},
+        {"type":"TIER","code":"MASTER","displayName":"마스터","sortOrder":80,"metadata":null},
+        {"type":"TIER","code":"GRANDMASTER","displayName":"그랜드마스터","sortOrder":90,"metadata":null},
+        {"type":"TIER","code":"CHALLENGER","displayName":"챌린저","sortOrder":100,"metadata":null},
+        {"type":"PLATFORM","code":"PC","displayName":"PC","sortOrder":10,"metadata":null},
+        {"type":"REGION","code":"KR","displayName":"대한민국","sortOrder":10,"metadata":null},
+        {"type":"MAP","code":"SUMMONERS_RIFT","displayName":"소환사의 협곡","sortOrder":10,"metadata":null},
+        {"type":"MAP","code":"HOWLING_ABYSS","displayName":"칼바람 나락","sortOrder":20,"metadata":null}
+      ]
+    },
+    {
+      "slug": "valorant",
+      "name": "VALORANT",
+      "description": "요원별 고유 능력과 정밀한 사격을 결합한 라이엇 게임즈의 5대5 전술 슈팅 게임",
+      "imageUrl": null,
+      "options": [
+        {"type":"MODE","code":"UNRATED","displayName":"일반전","sortOrder":10,"metadata":null},
+        {"type":"MODE","code":"COMPETITIVE","displayName":"경쟁전","sortOrder":20,"metadata":null},
+        {"type":"MODE","code":"SWIFTPLAY","displayName":"신속 플레이","sortOrder":30,"metadata":null},
+        {"type":"MODE","code":"PREMIER","displayName":"프리미어","sortOrder":40,"metadata":null},
+        {"type":"ROLE","code":"DUELIST","displayName":"타격대","sortOrder":10,"metadata":null},
+        {"type":"ROLE","code":"INITIATOR","displayName":"척후대","sortOrder":20,"metadata":null},
+        {"type":"ROLE","code":"CONTROLLER","displayName":"전략가","sortOrder":30,"metadata":null},
+        {"type":"ROLE","code":"SENTINEL","displayName":"감시자","sortOrder":40,"metadata":null},
+        {"type":"TIER","code":"IRON","displayName":"아이언","sortOrder":10,"metadata":null},
+        {"type":"TIER","code":"BRONZE","displayName":"브론즈","sortOrder":20,"metadata":null},
+        {"type":"TIER","code":"SILVER","displayName":"실버","sortOrder":30,"metadata":null},
+        {"type":"TIER","code":"GOLD","displayName":"골드","sortOrder":40,"metadata":null},
+        {"type":"TIER","code":"PLATINUM","displayName":"플래티넘","sortOrder":50,"metadata":null},
+        {"type":"TIER","code":"DIAMOND","displayName":"다이아몬드","sortOrder":60,"metadata":null},
+        {"type":"TIER","code":"ASCENDANT","displayName":"초월자","sortOrder":70,"metadata":null},
+        {"type":"TIER","code":"IMMORTAL","displayName":"불멸","sortOrder":80,"metadata":null},
+        {"type":"TIER","code":"RADIANT","displayName":"레디언트","sortOrder":90,"metadata":null},
+        {"type":"PLATFORM","code":"PC","displayName":"PC","sortOrder":10,"metadata":null},
+        {"type":"REGION","code":"KR","displayName":"대한민국","sortOrder":10,"metadata":null}
+      ]
+    },
+    {
+      "slug": "pubg-battlegrounds",
+      "name": "PUBG: 배틀그라운드",
+      "description": "최후의 생존 팀을 가리는 크래프톤의 배틀로얄 슈팅 게임",
+      "imageUrl": null,
+      "options": [
+        {"type":"MODE","code":"NORMAL","displayName":"일반전","sortOrder":10,"metadata":null},
+        {"type":"MODE","code":"RANKED","displayName":"경쟁전","sortOrder":20,"metadata":null},
+        {"type":"MODE","code":"ARCADE","displayName":"아케이드","sortOrder":30,"metadata":null},
+        {"type":"MODE","code":"RUMBLE","displayName":"럼블","sortOrder":40,"metadata":null},
+        {"type":"ROLE","code":"IGL","displayName":"오더","sortOrder":10,"metadata":null},
+        {"type":"ROLE","code":"FRAGGER","displayName":"프래거","sortOrder":20,"metadata":null},
+        {"type":"ROLE","code":"SCOUT","displayName":"스카우트","sortOrder":30,"metadata":null},
+        {"type":"ROLE","code":"SUPPORT","displayName":"서포트","sortOrder":40,"metadata":null},
+        {"type":"TIER","code":"BRONZE","displayName":"브론즈","sortOrder":10,"metadata":null},
+        {"type":"TIER","code":"SILVER","displayName":"실버","sortOrder":20,"metadata":null},
+        {"type":"TIER","code":"GOLD","displayName":"골드","sortOrder":30,"metadata":null},
+        {"type":"TIER","code":"PLATINUM","displayName":"플래티넘","sortOrder":40,"metadata":null},
+        {"type":"TIER","code":"CRYSTAL","displayName":"크리스탈","sortOrder":50,"metadata":null},
+        {"type":"TIER","code":"DIAMOND","displayName":"다이아몬드","sortOrder":60,"metadata":null},
+        {"type":"TIER","code":"MASTER","displayName":"마스터","sortOrder":70,"metadata":null},
+        {"type":"TIER","code":"SURVIVOR","displayName":"서바이버","sortOrder":80,"metadata":null},
+        {"type":"PLATFORM","code":"PC","displayName":"PC","sortOrder":10,"metadata":null},
+        {"type":"PLATFORM","code":"PLAYSTATION_5","displayName":"PlayStation 5","sortOrder":20,"metadata":null},
+        {"type":"PLATFORM","code":"XBOX_SERIES","displayName":"Xbox Series X|S","sortOrder":30,"metadata":null},
+        {"type":"REGION","code":"ASIA","displayName":"아시아","sortOrder":10,"metadata":null},
+        {"type":"MAP","code":"ERANGEL","displayName":"에란겔","sortOrder":10,"metadata":null},
+        {"type":"MAP","code":"MIRAMAR","displayName":"미라마","sortOrder":20,"metadata":null},
+        {"type":"MAP","code":"SANHOK","displayName":"사녹","sortOrder":30,"metadata":null},
+        {"type":"MAP","code":"TAEGO","displayName":"태이고","sortOrder":40,"metadata":null},
+        {"type":"MAP","code":"VIKENDI","displayName":"비켄디","sortOrder":50,"metadata":null},
+        {"type":"MAP","code":"DESTON","displayName":"데스턴","sortOrder":60,"metadata":null},
+        {"type":"MAP","code":"RONDO","displayName":"론도","sortOrder":70,"metadata":null}
+      ]
+    },
+    {
+      "slug": "overwatch",
+      "name": "오버워치",
+      "description": "역할별 영웅 조합과 목표 수행을 중심으로 하는 블리자드의 팀 기반 액션 게임",
+      "imageUrl": null,
+      "options": [
+        {"type":"MODE","code":"QUICK_PLAY","displayName":"빠른 대전","sortOrder":10,"metadata":null},
+        {"type":"MODE","code":"COMPETITIVE_ROLE","displayName":"역할 고정 경쟁전","sortOrder":20,"metadata":null},
+        {"type":"MODE","code":"COMPETITIVE_OPEN","displayName":"자유 경쟁전","sortOrder":30,"metadata":null},
+        {"type":"MODE","code":"STADIUM","displayName":"스타디움","sortOrder":40,"metadata":null},
+        {"type":"ROLE","code":"TANK","displayName":"돌격","sortOrder":10,"metadata":null},
+        {"type":"ROLE","code":"DAMAGE","displayName":"공격","sortOrder":20,"metadata":null},
+        {"type":"ROLE","code":"SUPPORT","displayName":"지원","sortOrder":30,"metadata":null},
+        {"type":"TIER","code":"BRONZE","displayName":"브론즈","sortOrder":10,"metadata":null},
+        {"type":"TIER","code":"SILVER","displayName":"실버","sortOrder":20,"metadata":null},
+        {"type":"TIER","code":"GOLD","displayName":"골드","sortOrder":30,"metadata":null},
+        {"type":"TIER","code":"PLATINUM","displayName":"플래티넘","sortOrder":40,"metadata":null},
+        {"type":"TIER","code":"DIAMOND","displayName":"다이아몬드","sortOrder":50,"metadata":null},
+        {"type":"TIER","code":"MASTER","displayName":"마스터","sortOrder":60,"metadata":null},
+        {"type":"TIER","code":"GRANDMASTER","displayName":"그랜드마스터","sortOrder":70,"metadata":null},
+        {"type":"TIER","code":"CHAMPION","displayName":"챔피언","sortOrder":80,"metadata":null},
+        {"type":"PLATFORM","code":"PC","displayName":"PC","sortOrder":10,"metadata":null},
+        {"type":"PLATFORM","code":"CONSOLE","displayName":"콘솔","sortOrder":20,"metadata":null},
+        {"type":"REGION","code":"ASIA","displayName":"아시아","sortOrder":10,"metadata":null}
+      ]
+    },
+    {
+      "slug": "fc-online",
+      "name": "FC 온라인",
+      "description": "실제 축구 선수와 구단을 기반으로 스쿼드를 구성하는 온라인 축구 게임",
+      "imageUrl": null,
+      "options": [
+        {"type":"MODE","code":"OFFICIAL_MATCH","displayName":"공식 경기","sortOrder":10,"metadata":null},
+        {"type":"MODE","code":"MANAGER_MODE","displayName":"감독 모드","sortOrder":20,"metadata":null},
+        {"type":"MODE","code":"FRIENDLY_MATCH","displayName":"친선 경기","sortOrder":30,"metadata":null},
+        {"type":"MODE","code":"VOLTA_LIVE","displayName":"볼타 라이브","sortOrder":40,"metadata":null},
+        {"type":"PLATFORM","code":"PC","displayName":"PC","sortOrder":10,"metadata":null},
+        {"type":"REGION","code":"KR","displayName":"대한민국","sortOrder":10,"metadata":null}
+      ]
+    },
+    {
+      "slug": "sudden-attack",
+      "name": "서든어택",
+      "description": "빠른 교전과 다양한 미션을 지원하는 넥슨의 온라인 FPS 게임",
+      "imageUrl": null,
+      "options": [
+        {"type":"MODE","code":"TEAM_DEATHMATCH","displayName":"팀 데스매치","sortOrder":10,"metadata":null},
+        {"type":"MODE","code":"BOMB_MISSION","displayName":"폭파미션","sortOrder":20,"metadata":null},
+        {"type":"MODE","code":"INDIVIDUAL_MATCH","displayName":"개인전","sortOrder":30,"metadata":null},
+        {"type":"ROLE","code":"RIFLER","displayName":"라이플","sortOrder":10,"metadata":null},
+        {"type":"ROLE","code":"SNIPER","displayName":"스나이퍼","sortOrder":20,"metadata":null},
+        {"type":"PLATFORM","code":"PC","displayName":"PC","sortOrder":10,"metadata":null},
+        {"type":"REGION","code":"KR","displayName":"대한민국","sortOrder":10,"metadata":null}
+      ]
+    },
+    {
+      "slug": "lost-ark",
+      "name": "로스트아크",
+      "description": "군단장 레이드와 협동 콘텐츠를 중심으로 하는 스마일게이트의 온라인 MMORPG",
+      "imageUrl": null,
+      "options": [
+        {"type":"MODE","code":"LEGION_RAID","displayName":"군단장 레이드","sortOrder":10,"metadata":null},
+        {"type":"MODE","code":"KAZEROS_RAID","displayName":"카제로스 레이드","sortOrder":20,"metadata":null},
+        {"type":"MODE","code":"GUARDIAN_RAID","displayName":"가디언 토벌","sortOrder":30,"metadata":null},
+        {"type":"MODE","code":"ABYSS_DUNGEON","displayName":"어비스 던전","sortOrder":40,"metadata":null},
+        {"type":"MODE","code":"PVP","displayName":"증명의 전장","sortOrder":50,"metadata":null},
+        {"type":"ROLE","code":"DEALER","displayName":"딜러","sortOrder":10,"metadata":null},
+        {"type":"ROLE","code":"SUPPORT","displayName":"서포터","sortOrder":20,"metadata":null},
+        {"type":"PLATFORM","code":"PC","displayName":"PC","sortOrder":10,"metadata":null},
+        {"type":"REGION","code":"KR","displayName":"대한민국","sortOrder":10,"metadata":null}
+      ]
+    }
+  ]
+}

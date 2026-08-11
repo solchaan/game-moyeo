@@ -67,6 +67,18 @@ cp frontend/.env.example frontend/.env
 
 현재 UI는 게임 목록·상세, 모임 목록·상세·생성·수정·삭제, 소셜 로그인 콜백을 지원합니다. 참여 신청/예약은 백엔드 예약 API가 추가된 뒤 연결할 수 있도록 상세 화면에서 비활성 상태로 표시합니다.
 
+## Major game seed
+
+2026년 5월 31일 기준 한국 주요 온라인 게임과 모드·역할·티어 등의 초기 카탈로그는 관리자 API로 등록할 수 있습니다. 동일한 slug가 이미 있으면 건너뜁니다.
+
+```bash
+ADMIN_USERNAME=admin \
+ADMIN_PASSWORD='관리자 비밀번호' \
+./scripts/seed-major-games.sh
+```
+
+다른 API 주소를 사용할 때는 `API_BASE_URL`을 함께 지정합니다. 기준 데이터는 `scripts/data/major-games-2026-05.json`에 있습니다.
+
 ## AI harness
 
 - 백엔드와 저장소 공통 규칙: `AGENTS.md`
