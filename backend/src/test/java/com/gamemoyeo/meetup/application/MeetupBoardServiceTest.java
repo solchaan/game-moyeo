@@ -52,11 +52,31 @@ class MeetupBoardServiceTest {
             .hasMessageContaining("Invalid or inactive game option");
     }
 
+    @Test
+    void rejectsMinimumTierHigherThanMaximumTier() {
+        MeetupCommand command = tierCommand(20L, 10L);
+        GameView game = new GameView(1L, "test-game", "Test Game", null, null, true);
+        OptionView bronze = new OptionView(10L, 1L, OptionType.TIER, "BRONZE", "Bronze", 10, true, null);
+        OptionView gold = new OptionView(20L, 1L, OptionType.TIER, "GOLD", "Gold", 20, true, null);
+        when(catalog.findGame(1L)).thenReturn(new GameDetailView(game, List.of(bronze, gold)));
+
+        assertThatThrownBy(() -> service.create(7L, command))
+            .isInstanceOf(ApiException.class)
+            .hasMessageContaining("Minimum tier cannot be higher");
+    }
+
     private MeetupCommand command(long modeOptionId) {
         Instant start = Instant.now().plusSeconds(3600);
         return new MeetupCommand(1L, modeOptionId, null, null, null, null, "Rank game", null,
             "COMPETITIVE", "REQUIRED", "FIRST_COME", start.minusSeconds(600), start,
             start.plusSeconds(7200), 5, Map.of());
+    }
+
+    private MeetupCommand tierCommand(long minimumTierOptionId, long maximumTierOptionId) {
+        Instant start = Instant.now().plusSeconds(3600);
+        return new MeetupCommand(1L, null, null, null, minimumTierOptionId, maximumTierOptionId,
+            "Rank game", null, "COMPETITIVE", "REQUIRED", "FIRST_COME", start.minusSeconds(600),
+            start, start.plusSeconds(7200), 5, Map.of());
     }
 
     private GameDetailView game(long optionId, OptionType type) {

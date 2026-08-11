@@ -1,4 +1,4 @@
-import type { CursorPage, Game, GameDetail, GamePayload, Meetup, MeetupPayload, Problem, TokenPair } from './types'
+import type { CreateGamePayload, CursorPage, Game, GameDetail, GameOption, GameOptionPayload, Meetup, MeetupPayload, Problem, TokenPair } from './types'
 import { getAccessToken } from './auth'
 
 const base = import.meta.env.VITE_API_BASE_URL ?? ''
@@ -13,7 +13,8 @@ async function request<T>(path:string, init:RequestInit = {}):Promise<T> {
 export const api = {
   games:()=>request<Game[]>('/api/v1/games'),
   game:(id:number)=>request<GameDetail>(`/api/v1/games/${id}`),
-  createGame:(body:GamePayload)=>request<Game>('/api/v1/admin/games',{method:'POST',headers:{'Idempotency-Key':crypto.randomUUID()},body:JSON.stringify(body)}),
+  createGame:(body:CreateGamePayload)=>request<GameDetail>('/api/v1/admin/games',{method:'POST',headers:{'Idempotency-Key':crypto.randomUUID()},body:JSON.stringify(body)}),
+  createGameOption:(gameId:number,body:GameOptionPayload)=>request<GameOption>(`/api/v1/admin/games/${gameId}/options`,{method:'POST',headers:{'Idempotency-Key':crypto.randomUUID()},body:JSON.stringify(body)}),
   meetups:(gameId?:number,cursor?:number)=>request<CursorPage<Meetup>>(`/api/v1/meetups?size=20${gameId?`&gameId=${gameId}`:''}${cursor?`&cursor=${cursor}`:''}`),
   meetup:(id:number)=>request<Meetup>(`/api/v1/meetups/${id}`),
   createMeetup:(body:MeetupPayload)=>request<Meetup>('/api/v1/meetups',{method:'POST',headers:{'Idempotency-Key':crypto.randomUUID()},body:JSON.stringify(body)}),

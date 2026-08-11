@@ -1,6 +1,8 @@
 export type OptionType = 'MODE'|'TIER'|'ROLE'|'PLATFORM'|'REGION'|'MAP'
 export interface Game { id:number; slug:string; name:string; description:string|null; imageUrl:string|null; active:boolean }
 export interface GamePayload { slug:string; name:string; description:string|null; imageUrl:string|null }
+export interface GameOptionPayload { type:OptionType; code:string; displayName:string; sortOrder:number; metadata:string|null }
+export interface CreateGamePayload extends GamePayload { options:GameOptionPayload[] }
 export interface TokenPair { accessToken:string; refreshToken:string; expiresIn:number; tokenType:string }
 export interface GameOption { id:number; gameId:number; type:OptionType; code:string; displayName:string; sortOrder:number; active:boolean; metadata:string|null }
 export interface GameDetail { game:Game; options:GameOption[] }

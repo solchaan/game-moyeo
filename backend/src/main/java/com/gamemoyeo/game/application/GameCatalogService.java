@@ -1,7 +1,11 @@
 package com.gamemoyeo.game.application;
 
+import com.gamemoyeo.common.exception.ApiException;
 import com.gamemoyeo.game.application.port.out.GameCatalogPort;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,8 +21,13 @@ public class GameCatalogService implements GameCatalogUseCase {
 
     @Override
     @Transactional
-    public GameView createGame(GameCommand command) {
-        return port.createGame(command);
+    public GameDetailView createGame(GameCommand command, List<OptionCommand> options) {
+        validateNewOptions(options);
+        GameView game = port.createGame(command);
+        for (OptionCommand option : options) {
+            port.createOption(game.id(), option);
+        }
+        return port.findGame(game.id());
     }
 
     @Override
@@ -59,5 +68,18 @@ public class GameCatalogService implements GameCatalogUseCase {
     @Override
     public GameDetailView findGame(long gameId) {
         return port.findGame(gameId);
+    }
+
+    private void validateNewOptions(List<OptionCommand> options) {
+        Set<OptionIdentity> identities = new HashSet<>();
+        for (OptionCommand option : options) {
+            if (!identities.add(new OptionIdentity(option.type(), option.code()))) {
+                throw new ApiException(HttpStatus.BAD_REQUEST, "GAME_OPTION_DUPLICATED_IN_REQUEST",
+                    "Game option type and code cannot be duplicated in one request.");
+            }
+        }
+    }
+
+    private record OptionIdentity(OptionType type, String code) {
     }
 }

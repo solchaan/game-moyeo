@@ -79,6 +79,7 @@ public class MeetupBoardService implements MeetupBoardUseCase {
         require(options, command.regionOptionId(), OptionType.REGION);
         require(options, command.minimumTierOptionId(), OptionType.TIER);
         require(options, command.maximumTierOptionId(), OptionType.TIER);
+        validateTierRange(options, command.minimumTierOptionId(), command.maximumTierOptionId());
         command.roleRequirements().forEach((id, capacity) -> {
             require(options, id, OptionType.ROLE);
             if (capacity == null || capacity < 1) {
@@ -98,6 +99,17 @@ public class MeetupBoardService implements MeetupBoardUseCase {
         OptionView option = options.get(id);
         if (option == null || option.type() != type || !option.active()) {
             throw invalid("Invalid or inactive game option: " + id);
+        }
+    }
+
+    private void validateTierRange(Map<Long, OptionView> options, Long minimumId, Long maximumId) {
+        if (minimumId == null || maximumId == null) {
+            return;
+        }
+        OptionView minimum = options.get(minimumId);
+        OptionView maximum = options.get(maximumId);
+        if (minimum.sortOrder() > maximum.sortOrder()) {
+            throw invalid("Minimum tier cannot be higher than maximum tier.");
         }
     }
 

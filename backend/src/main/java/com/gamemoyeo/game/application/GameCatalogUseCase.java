@@ -4,7 +4,7 @@ import java.util.List;
 
 public interface GameCatalogUseCase {
 
-    GameView createGame(GameCommand command);
+    GameDetailView createGame(GameCommand command, List<OptionCommand> options);
 
     GameView updateGame(long gameId, GameCommand command);
 

@@ -48,9 +48,9 @@ public class GameCatalogController {
 
     @PostMapping("/admin/games")
     @PreAuthorize("hasRole('ADMIN')")
-    ResponseEntity<GameView> createGame(@Valid @RequestBody GameRequest request) {
-        GameView created = useCase.createGame(request.command());
-        return ResponseEntity.created(URI.create("/api/v1/games/" + created.id())).body(created);
+    ResponseEntity<GameDetailView> createGame(@Valid @RequestBody CreateGameRequest request) {
+        GameDetailView created = useCase.createGame(request.gameCommand(), request.optionCommands());
+        return ResponseEntity.created(URI.create("/api/v1/games/" + created.game().id())).body(created);
     }
 
     @PutMapping("/admin/games/{gameId}")
@@ -102,6 +102,25 @@ public class GameCatalogController {
     ) {
         GameCommand command() {
             return new GameCommand(slug, name, description, imageUrl);
+        }
+    }
+
+    record CreateGameRequest(
+        @NotBlank @Pattern(regexp = "^[a-z0-9-]+$") @Size(max = 80) String slug,
+        @NotBlank @Size(max = 120) String name,
+        @Size(max = 500) String description,
+        @Size(max = 2048) String imageUrl,
+        @Valid @Size(max = 200) List<OptionRequest> options
+    ) {
+        GameCommand gameCommand() {
+            return new GameCommand(slug, name, description, imageUrl);
+        }
+
+        List<OptionCommand> optionCommands() {
+            if (options == null) {
+                return List.of();
+            }
+            return options.stream().map(OptionRequest::command).toList();
         }
     }
 
