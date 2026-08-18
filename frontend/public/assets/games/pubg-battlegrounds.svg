@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" role="img" aria-labelledby="title description">
+  <title id="title">PUBG: 배틀그라운드 텍스트 배지</title>
+  <desc id="description">공식 로고가 아닌 게임 식별용 텍스트 배지</desc>
+  <rect width="320" height="180" rx="28" fill="#282b24"/>
+  <rect x="12" y="12" width="296" height="156" rx="20" fill="none" stroke="#c8f04a" stroke-width="6"/>
+  <text x="160" y="86" fill="#f7f7f2" font-family="Arial, sans-serif" font-size="48" font-weight="800" text-anchor="middle">PUBG</text>
+  <text x="160" y="124" fill="#c8f04a" font-family="Arial, sans-serif" font-size="22" font-weight="700" text-anchor="middle">BATTLEGROUNDS</text>
+</svg>

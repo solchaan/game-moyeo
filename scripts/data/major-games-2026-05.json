@@ -6,7 +6,7 @@
       "slug": "league-of-legends",
       "name": "리그 오브 레전드",
       "description": "5명이 역할을 나눠 협력하는 라이엇 게임즈의 팀 기반 MOBA 게임",
-      "imageUrl": null,
+      "imageUrl": "/assets/games/league-of-legends.png",
       "options": [
         {"type":"MODE","code":"NORMAL_DRAFT","displayName":"일반 교차 선택","sortOrder":10,"metadata":null},
         {"type":"MODE","code":"RANKED_SOLO","displayName":"개인/2인 랭크","sortOrder":20,"metadata":null},
@@ -37,7 +37,7 @@
       "slug": "valorant",
       "name": "VALORANT",
       "description": "요원별 고유 능력과 정밀한 사격을 결합한 라이엇 게임즈의 5대5 전술 슈팅 게임",
-      "imageUrl": null,
+      "imageUrl": "/assets/games/valorant.png",
       "options": [
         {"type":"MODE","code":"UNRATED","displayName":"일반전","sortOrder":10,"metadata":null},
         {"type":"MODE","code":"COMPETITIVE","displayName":"경쟁전","sortOrder":20,"metadata":null},
@@ -64,7 +64,7 @@
       "slug": "pubg-battlegrounds",
       "name": "PUBG: 배틀그라운드",
       "description": "최후의 생존 팀을 가리는 크래프톤의 배틀로얄 슈팅 게임",
-      "imageUrl": null,
+      "imageUrl": "/assets/games/pubg-battlegrounds.svg",
       "options": [
         {"type":"MODE","code":"NORMAL","displayName":"일반전","sortOrder":10,"metadata":null},
         {"type":"MODE","code":"RANKED","displayName":"경쟁전","sortOrder":20,"metadata":null},
@@ -99,7 +99,7 @@
       "slug": "overwatch",
       "name": "오버워치",
       "description": "역할별 영웅 조합과 목표 수행을 중심으로 하는 블리자드의 팀 기반 액션 게임",
-      "imageUrl": null,
+      "imageUrl": "/assets/games/overwatch.jpg",
       "options": [
         {"type":"MODE","code":"QUICK_PLAY","displayName":"빠른 대전","sortOrder":10,"metadata":null},
         {"type":"MODE","code":"COMPETITIVE_ROLE","displayName":"역할 고정 경쟁전","sortOrder":20,"metadata":null},
@@ -125,7 +125,7 @@
       "slug": "fc-online",
       "name": "FC 온라인",
       "description": "실제 축구 선수와 구단을 기반으로 스쿼드를 구성하는 온라인 축구 게임",
-      "imageUrl": null,
+      "imageUrl": "/assets/games/fc-online.png",
       "options": [
         {"type":"MODE","code":"OFFICIAL_MATCH","displayName":"공식 경기","sortOrder":10,"metadata":null},
         {"type":"MODE","code":"MANAGER_MODE","displayName":"감독 모드","sortOrder":20,"metadata":null},
@@ -139,7 +139,7 @@
       "slug": "sudden-attack",
       "name": "서든어택",
       "description": "빠른 교전과 다양한 미션을 지원하는 넥슨의 온라인 FPS 게임",
-      "imageUrl": null,
+      "imageUrl": "/assets/games/sudden-attack.png",
       "options": [
         {"type":"MODE","code":"TEAM_DEATHMATCH","displayName":"팀 데스매치","sortOrder":10,"metadata":null},
         {"type":"MODE","code":"BOMB_MISSION","displayName":"폭파미션","sortOrder":20,"metadata":null},
@@ -154,7 +154,7 @@
       "slug": "lost-ark",
       "name": "로스트아크",
       "description": "군단장 레이드와 협동 콘텐츠를 중심으로 하는 스마일게이트의 온라인 MMORPG",
-      "imageUrl": null,
+      "imageUrl": "/assets/games/lost-ark.png",
       "options": [
         {"type":"MODE","code":"LEGION_RAID","displayName":"군단장 레이드","sortOrder":10,"metadata":null},
         {"type":"MODE","code":"KAZEROS_RAID","displayName":"카제로스 레이드","sortOrder":20,"metadata":null},
