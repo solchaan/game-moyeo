@@ -40,7 +40,7 @@ spring:
 
 app:
   security:
-    enabled: ${SECURITY_ENABLED:false}
+    enabled: ${SECURITY_ENABLED:true}
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:5173}
   social-login:

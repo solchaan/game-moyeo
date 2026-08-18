@@ -62,7 +62,7 @@ fi
 : "${DB_PASSWORD:=local_password}"
 : "${REDIS_HOST:=localhost}"
 : "${REDIS_PORT:=6379}"
-: "${SECURITY_ENABLED:=false}"
+: "${SECURITY_ENABLED:=true}"
 : "${SPRING_PROFILES_ACTIVE:=local}"
 
 export DB_URL DB_USERNAME DB_PASSWORD REDIS_HOST REDIS_PORT SECURITY_ENABLED
