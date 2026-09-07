@@ -1,0 +1,35 @@
+{
+	auto_https off
+	servers {
+		trusted_proxies static private_ranges
+	}
+}
+
+:80 {
+	root * /srv
+	encode zstd gzip
+	header X-Content-Type-Options nosniff
+	header Referrer-Policy strict-origin-when-cross-origin
+
+	handle /healthz {
+		respond "ok" 200
+	}
+
+	@backend path /api /api/* /oauth2/* /login/oauth2/*
+	handle @backend {
+		reverse_proxy backend:8080
+	}
+
+	handle /assets/* {
+		header Cache-Control "public, max-age=3600"
+		file_server
+	}
+
+	handle {
+		route {
+			try_files {path} /index.html
+			header /index.html Cache-Control no-cache
+			file_server
+		}
+	}
+}

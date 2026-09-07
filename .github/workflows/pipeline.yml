@@ -1,0 +1,54 @@
+name: Verify and deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pipeline-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  backend:
+    name: Backend
+    uses: ./.github/workflows/backend.yml
+
+  frontend:
+    name: Frontend
+    uses: ./.github/workflows/frontend.yml
+
+  deploy:
+    name: Deploy to Mac
+    needs: [backend, frontend]
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && github.repository == 'solchaan/game-moyeo'
+    runs-on: [self-hosted, macOS, ARM64, game-moyeo-deploy]
+    timeout-minutes: 30
+    concurrency:
+      group: game-moyeo-production
+      cancel-in-progress: false
+    env:
+      DOCKER_CONTEXT: colima
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Check this is still the latest main commit
+        id: latest
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          current_sha=$(gh api "repos/$GITHUB_REPOSITORY/commits/main" --jq .sha)
+          if [ "$current_sha" = "$GITHUB_SHA" ]; then
+            echo 'deploy=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'Skipping superseded commit.'
+          fi
+      - name: Build, back up and deploy containers
+        if: steps.latest.outputs.deploy == 'true'
+        run: bash scripts/deploy-containers.sh

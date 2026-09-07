@@ -1,0 +1,16 @@
+.git
+.idea
+.env
+.env.*
+**/.env
+**/.env.*
+**/node_modules
+**/dist
+**/build
+**/.gradle
+**/*.tsbuildinfo
+**/playwright-report
+**/test-results
+.runtime
+backups
+**/.DS_Store
