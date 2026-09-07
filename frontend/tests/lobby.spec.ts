@@ -16,9 +16,24 @@ test.beforeEach(async ({ page }) => {
 
 test('shows the lobby and its empty state without horizontal overflow', async ({ page }) => {
   await page.goto('/')
-  await expect(page.getByRole('heading', { name: /오늘의 한 판/ })).toBeVisible()
+  await expect(page.getByRole('heading', { level: 1, name: '전체 모임', exact: true })).toBeVisible()
   await expect(page.getByRole('heading', { name: '첫 모임의 주인공이 되어볼까요?' })).toBeVisible()
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
+})
+
+test('omits the removed promotional copy and keeps game navigation accessible', async ({ page }) => {
+  await page.goto('/')
+  await expect(page.getByRole('heading', { level: 1, name: '전체 모임', exact: true })).toBeVisible()
+  await expect(page.getByRole('complementary', { name: 'PICK YOUR GAME' })).toBeVisible()
+  await expect(page.getByRole('group', { name: '게임 선택' }).getByRole('button', { name: '전체 게임' })).toBeVisible()
+  for (const copy of [
+    /어떤 게임 할까요/, /잘하는 게임도/, /처음 해보는 게임도/, /같이 하면 더 재밌으니까/,
+    /오늘의 한 판/, /여기서 모여요/, /나에게 맞는 분위기/, /함께할 시간/,
+    /모임에서 확인해\s*보세요/, /gg\./i, /실력은 달라도/, /즐거운 한 판은 함께/,
+    /good game, good company/i,
+  ]) {
+    await expect(page.getByText(copy)).toHaveCount(0)
+  }
 })
 
 test('persists the selected game across reload and browser back', async ({ page }) => {
