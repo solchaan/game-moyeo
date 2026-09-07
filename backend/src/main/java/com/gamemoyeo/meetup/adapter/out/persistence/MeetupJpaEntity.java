@@ -73,6 +73,7 @@ class MeetupJpaEntity {
         this.ownerId = ownerId;
         update(command);
         this.session = new MeetupSessionJpaEntity(this, command);
+        this.status = session.status;
     }
 
     void update(MeetupCommand command) {
@@ -92,6 +93,7 @@ class MeetupJpaEntity {
         roleRequirements.putAll(command.roleRequirements());
         if (session != null) {
             session.update(command);
+            status = session.status;
         }
     }
 }

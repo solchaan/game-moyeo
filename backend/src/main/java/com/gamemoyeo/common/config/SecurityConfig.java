@@ -28,8 +28,8 @@ public class SecurityConfig {
                 .requestMatchers("/actuator/health/**").permitAll()
                 .requestMatchers("/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                 .requestMatchers("/oauth2/**", "/login/oauth2/**", "/api/v1/auth/token").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/v1/auth/admin/login").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/v1/auth/login", "/api/v1/auth/register").permitAll()
+                .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.GET, "/api/v1/games/**", "/api/v1/meetups/**").permitAll()
                 .anyRequest().authenticated())
             .oauth2ResourceServer(resourceServer -> resourceServer.jwt(jwt ->

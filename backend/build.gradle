@@ -105,6 +105,10 @@ tasks.named('jooqCodegen') {
     onlyIf { providers.environmentVariable('JOOQ_CODEGEN').orElse('false').get().toBoolean() }
 }
 
+tasks.named('compileJava') {
+    dependsOn tasks.named('jooqCodegen')
+}
+
 tasks.named('test') {
     useJUnitPlatform()
 }

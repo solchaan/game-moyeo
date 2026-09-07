@@ -5,6 +5,8 @@ import com.gamemoyeo.game.application.GameCatalogUseCase;
 import com.gamemoyeo.game.application.GameCatalogUseCase.OptionType;
 import com.gamemoyeo.game.application.GameCatalogUseCase.OptionView;
 import com.gamemoyeo.meetup.application.port.out.MeetupBoardPort;
+import com.gamemoyeo.reservation.application.ReservationUseCase;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
@@ -19,17 +21,21 @@ public class MeetupBoardService implements MeetupBoardUseCase {
 
     private final MeetupBoardPort port;
     private final GameCatalogUseCase catalog;
+    private final ReservationUseCase reservation;
 
-    public MeetupBoardService(MeetupBoardPort port, GameCatalogUseCase catalog) {
+    public MeetupBoardService(MeetupBoardPort port, GameCatalogUseCase catalog, ReservationUseCase reservation) {
         this.port = port;
         this.catalog = catalog;
+        this.reservation = reservation;
     }
 
     @Override
     @Transactional
     public MeetupView create(long ownerId, MeetupCommand command) {
         validate(command);
-        return port.create(ownerId, command);
+        MeetupView created = port.create(ownerId, command);
+        reservation.initializeOwner(created.id(), ownerId);
+        return created;
     }
 
     @Override
@@ -61,7 +67,10 @@ public class MeetupBoardService implements MeetupBoardUseCase {
     }
 
     private void validate(MeetupCommand command) {
-        if (!command.startsAt().isAfter(Instant.now()) || !command.endsAt().isAfter(command.startsAt())) {
+        if (!command.startsAt().isAfter(Instant.now().plus(Duration.ofMinutes(10)))) {
+            throw invalid("Meetup must start more than 10 minutes from now.");
+        }
+        if (!command.endsAt().isAfter(command.startsAt())) {
             throw invalid("Meetup time range is invalid.");
         }
         if (command.recruitmentDeadline() != null

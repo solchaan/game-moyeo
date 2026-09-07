@@ -18,19 +18,22 @@ class MariaDbMigrationTest {
     static final MariaDBContainer<?> MARIA_DB = new MariaDBContainer<>("mariadb:11.8");
 
     @Test
-    void migratesInitialSchema() throws Exception {
-        Flyway.configure()
+    void migratesReservationSchema() throws Exception {
+        var migrationResult = Flyway.configure()
             .dataSource(MARIA_DB.getJdbcUrl(), MARIA_DB.getUsername(), MARIA_DB.getPassword())
             .load()
             .migrate();
 
+        assertThat(migrationResult.targetSchemaVersion).isEqualTo("8");
+
         try (Connection connection = MARIA_DB.createConnection("");
              Statement statement = connection.createStatement();
-             ResultSet result = statement.executeQuery(
-                 "SELECT COUNT(*) FROM information_schema.tables "
-                     + "WHERE table_schema = DATABASE() AND table_name = 'reservation'")) {
-            assertThat(result.next()).isTrue();
-            assertThat(result.getInt(1)).isEqualTo(1);
+             ResultSet queryResult = statement.executeQuery(
+                 "SELECT COUNT(*) FROM information_schema.columns "
+                     + "WHERE table_schema = DATABASE() AND table_name = 'meetup_session' "
+                     + "AND column_name = 'closed_reason'")) {
+            assertThat(queryResult.next()).isTrue();
+            assertThat(queryResult.getInt(1)).isEqualTo(1);
         }
     }
 }

@@ -12,7 +12,9 @@ import com.gamemoyeo.game.application.GameCatalogUseCase.GameView;
 import com.gamemoyeo.game.application.GameCatalogUseCase.OptionType;
 import com.gamemoyeo.game.application.GameCatalogUseCase.OptionView;
 import com.gamemoyeo.meetup.application.MeetupBoardUseCase.MeetupCommand;
+import com.gamemoyeo.meetup.application.MeetupBoardUseCase.MeetupView;
 import com.gamemoyeo.meetup.application.port.out.MeetupBoardPort;
+import com.gamemoyeo.reservation.application.ReservationUseCase;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -23,23 +25,27 @@ class MeetupBoardServiceTest {
 
     private MeetupBoardPort port;
     private GameCatalogUseCase catalog;
+    private ReservationUseCase reservation;
     private MeetupBoardService service;
 
     @BeforeEach
     void setUp() {
         port = mock(MeetupBoardPort.class);
         catalog = mock(GameCatalogUseCase.class);
-        service = new MeetupBoardService(port, catalog);
+        reservation = mock(ReservationUseCase.class);
+        service = new MeetupBoardService(port, catalog, reservation);
     }
 
     @Test
     void createsMeetupWithOptionsBelongingToSelectedGame() {
         MeetupCommand command = command(10L);
         when(catalog.findGame(1L)).thenReturn(game(10L, OptionType.MODE));
+        when(port.create(7L, command)).thenReturn(view());
 
         service.create(7L, command);
 
         verify(port).create(7L, command);
+        verify(reservation).initializeOwner(99L, 7L);
     }
 
     @Test
@@ -83,5 +89,12 @@ class MeetupBoardServiceTest {
         GameView game = new GameView(1L, "test-game", "Test Game", null, null, true);
         OptionView option = new OptionView(optionId, 1L, type, "RANKED", "Ranked", 0, true, null);
         return new GameDetailView(game, List.of(option));
+    }
+
+    private MeetupView view() {
+        Instant start = Instant.now().plusSeconds(3600);
+        return new MeetupView(99L, 1L, 7L, "Rank game", null, null, null, null, null, null,
+            "COMPETITIVE", "REQUIRED", "FIRST_COME", start.minusSeconds(600), start,
+            start.plusSeconds(7200), 5, 1, "OPEN", Map.of());
     }
 }

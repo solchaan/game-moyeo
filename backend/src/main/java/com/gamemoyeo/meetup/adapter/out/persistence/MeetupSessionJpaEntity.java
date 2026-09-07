@@ -33,6 +33,8 @@ class MeetupSessionJpaEntity {
     int reservedCount;
     @Column(nullable = false, length = 20)
     String status = "OPEN";
+    @Column(name = "closed_reason", length = 30)
+    String closedReason;
     @Version
     long version;
 
@@ -42,11 +44,23 @@ class MeetupSessionJpaEntity {
     MeetupSessionJpaEntity(MeetupJpaEntity meetup, MeetupCommand command) {
         this.meetup = meetup;
         update(command);
+        reservedCount = 1;
+        if (capacity == 1) {
+            status = "CLOSED";
+            closedReason = "FULL";
+        }
     }
 
     void update(MeetupCommand command) {
         startsAt = command.startsAt();
         endsAt = command.endsAt();
         capacity = command.capacity();
+        if (reservedCount >= capacity && reservedCount > 0) {
+            status = "CLOSED";
+            closedReason = "FULL";
+        } else if ("FULL".equals(closedReason)) {
+            status = "OPEN";
+            closedReason = null;
+        }
     }
 }

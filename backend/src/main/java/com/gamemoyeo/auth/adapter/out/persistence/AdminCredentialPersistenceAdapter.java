@@ -13,10 +13,16 @@ import org.springframework.stereotype.Component;
 public class AdminCredentialPersistenceAdapter implements AdminCredentialPort {
 
     private final AdminCredentialRepository credentials;
+    private final MemberCredentialRepository memberCredentials;
     private final MemberRepository members;
 
-    public AdminCredentialPersistenceAdapter(AdminCredentialRepository credentials, MemberRepository members) {
+    public AdminCredentialPersistenceAdapter(
+        AdminCredentialRepository credentials,
+        MemberCredentialRepository memberCredentials,
+        MemberRepository members
+    ) {
         this.credentials = credentials;
+        this.memberCredentials = memberCredentials;
         this.members = members;
     }
 
@@ -40,7 +46,9 @@ public class AdminCredentialPersistenceAdapter implements AdminCredentialPort {
     @Override
     public void create(String username, String passwordHash) {
         MemberJpaEntity member = members.save(MemberJpaEntity.localAdmin(username));
-        credentials.save(new AdminCredentialJpaEntity(member, username, passwordHash, Instant.now()));
+        Instant now = Instant.now();
+        credentials.save(new AdminCredentialJpaEntity(member, username, passwordHash, now));
+        memberCredentials.save(new MemberCredentialJpaEntity(member, username, passwordHash, now));
     }
 
     private AdminCredentialJpaEntity credential(long id) {
