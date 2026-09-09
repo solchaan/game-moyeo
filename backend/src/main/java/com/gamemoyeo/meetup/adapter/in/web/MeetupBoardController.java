@@ -1,5 +1,9 @@
 package com.gamemoyeo.meetup.adapter.in.web;
 
+import com.gamemoyeo.common.exception.ValidationProblem;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import com.gamemoyeo.common.exception.ApiException;
 import com.gamemoyeo.meetup.application.MeetupBoardUseCase;
 import com.gamemoyeo.meetup.application.MeetupBoardUseCase.CursorPage;
@@ -56,6 +60,8 @@ public class MeetupBoardController {
         return useCase.find(meetupId);
     }
 
+    @ApiResponse(responseCode = "400", description = "입력 형식 또는 모임 조건 검증 실패",
+        content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ValidationProblem.class)))
     @PostMapping
     ResponseEntity<MeetupView> create(
         @AuthenticationPrincipal Jwt jwt,
@@ -65,6 +71,8 @@ public class MeetupBoardController {
         return ResponseEntity.created(URI.create("/api/v1/meetups/" + created.id())).body(created);
     }
 
+    @ApiResponse(responseCode = "400", description = "입력 형식 또는 모임 조건 검증 실패",
+        content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ValidationProblem.class)))
     @PutMapping("/{meetupId}")
     MeetupView update(
         @PathVariable long meetupId,

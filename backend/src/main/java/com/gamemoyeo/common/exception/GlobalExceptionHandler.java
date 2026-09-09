@@ -1,5 +1,14 @@
 package com.gamemoyeo.common.exception;
 
+import org.springframework.core.annotation.Order;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.context.request.ServletWebRequest;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import java.util.stream.Collectors;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import java.net.URI;
@@ -17,7 +26,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.dao.DataIntegrityViolationException;
 
 @RestControllerAdvice
-public class GlobalExceptionHandler {
+@Order(-1)
+public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
     private static final String PROBLEM_BASE_URL = "https://api.gamemoyeo.com/problems/";
@@ -26,18 +36,42 @@ public class GlobalExceptionHandler {
     ResponseEntity<ProblemDetail> handleApiException(ApiException exception, HttpServletRequest request) {
         ProblemDetail problem = createProblem(
             exception.status(), exception.code(), exception.getMessage(), request.getRequestURI());
+        if (!exception.fieldErrors().isEmpty()) {
+            problem.setProperty("fieldErrors", exception.fieldErrors().entrySet().stream()
+                .map(entry -> new FieldErrorDetail(entry.getKey(), entry.getValue())).toList());
+        }
         return ResponseEntity.status(exception.status()).body(problem);
     }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    ResponseEntity<ProblemDetail> handleInvalidArgument(
-        MethodArgumentNotValidException exception, HttpServletRequest request) {
+    @Override
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(
+        MethodArgumentNotValidException exception, HttpHeaders headers,
+        HttpStatusCode status, WebRequest request) {
         ProblemDetail problem = createProblem(
-            HttpStatus.BAD_REQUEST, "VALIDATION_FAILED", "Request validation failed.", request.getRequestURI());
+            HttpStatus.BAD_REQUEST, "VALIDATION_FAILED", "입력한 항목을 확인해 주세요.", ((ServletWebRequest) request).getRequest().getRequestURI());
         List<FieldErrorDetail> fieldErrors = exception.getBindingResult().getFieldErrors().stream()
             .map(error -> new FieldErrorDetail(error.getField(), error.getDefaultMessage()))
             .toList();
         problem.setProperty("fieldErrors", fieldErrors);
+        return ResponseEntity.badRequest().body(problem);
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleHttpMessageNotReadable(
+        HttpMessageNotReadableException exception,
+        HttpHeaders headers, HttpStatusCode status,
+        WebRequest request) {
+        ProblemDetail problem = createProblem(HttpStatus.BAD_REQUEST, "INVALID_REQUEST_BODY",
+            "입력 형식이 올바르지 않습니다. 날짜와 숫자 항목을 확인해 주세요.",
+            ((ServletWebRequest) request).getRequest().getRequestURI());
+        if (exception.getCause() instanceof JsonMappingException mapping) {
+            String field = mapping.getPath().stream()
+                .map(reference -> reference.getFieldName() == null ? "[" + reference.getIndex() + "]" : reference.getFieldName())
+                .collect(Collectors.joining(".")).replace(".[", "[");
+            if (!field.isBlank()) {
+                problem.setProperty("fieldErrors", List.of(new FieldErrorDetail(field, "입력 형식을 확인해 주세요.")));
+            }
+        }
         return ResponseEntity.badRequest().body(problem);
     }
 

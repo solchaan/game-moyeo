@@ -1,6 +1,7 @@
 package com.gamemoyeo.meetup.application;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -55,7 +56,8 @@ class MeetupBoardServiceTest {
 
         assertThatThrownBy(() -> service.create(7L, command))
             .isInstanceOf(ApiException.class)
-            .hasMessageContaining("Invalid or inactive game option");
+            .hasMessageContaining("Invalid or inactive game option")
+            .satisfies(error -> assertThat(((ApiException) error).fieldErrors()).containsKey("modeOptionId"));
     }
 
     @Test
@@ -68,7 +70,30 @@ class MeetupBoardServiceTest {
 
         assertThatThrownBy(() -> service.create(7L, command))
             .isInstanceOf(ApiException.class)
-            .hasMessageContaining("Minimum tier cannot be higher");
+            .hasMessageContaining("Minimum tier cannot be higher")
+            .satisfies(error -> assertThat(((ApiException) error).fieldErrors()).containsKey("minimumTierOptionId"));
+    }
+
+    @Test
+    void imminentStartIdentifiesStartField() {
+        Instant start = Instant.now().plusSeconds(300);
+        MeetupCommand command = new MeetupCommand(1L, null, null, null, null, null,
+            "Test", null, "CASUAL", "OPTIONAL", "FIRST_COME", null, start,
+            start.plusSeconds(3600), 5, Map.of());
+        assertThatThrownBy(() -> service.create(7L, command))
+            .isInstanceOf(ApiException.class)
+            .satisfies(error -> assertThat(((ApiException) error).fieldErrors()).containsKey("startsAt"));
+    }
+
+    @Test
+    void endBeforeStartIdentifiesEndField() {
+        Instant start = Instant.now().plusSeconds(3600);
+        MeetupCommand command = new MeetupCommand(1L, null, null, null, null, null,
+            "Test", null, "CASUAL", "OPTIONAL", "FIRST_COME", null, start,
+            start.minusSeconds(300), 5, Map.of());
+        assertThatThrownBy(() -> service.create(7L, command))
+            .isInstanceOf(ApiException.class)
+            .satisfies(error -> assertThat(((ApiException) error).fieldErrors()).containsKey("endsAt"));
     }
 
     private MeetupCommand command(long modeOptionId) {
