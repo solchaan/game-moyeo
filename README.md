@@ -190,3 +190,23 @@ ADMIN_PASSWORD='관리자 비밀번호' \
 - Spring Boot 프로젝트: `backend/`
 - React 프론트엔드 규칙: `frontend/AGENTS.md`
 - 전체 하네스 검사: `./scripts/check-ai-harness.sh`
+
+
+### 공유기 포트포워딩으로 도메인 공개
+
+배포 환경 파일(`~/.config/game-moyeo/container.env` 또는 `.env.container`)에 다음을 설정합니다.
+
+```dotenv
+APP_SITE_ADDRESS=gamemoyeo.noroo.kr
+APP_PUBLIC_BIND_IP=0.0.0.0
+APP_PUBLIC_HTTP_PORT=80
+APP_PUBLIC_HTTPS_PORT=443
+APP_ALLOWED_ORIGINS=https://gamemoyeo.noroo.kr,http://localhost:5173,http://127.0.0.1:5173
+APP_LOGIN_REDIRECT_URI=https://gamemoyeo.noroo.kr/oauth/callback
+```
+
+공유기의 외부 TCP 80·443을 서버의 동일한 포트로 전달하고 도메인의 A 레코드를
+공유기 WAN 공인 IP로 설정합니다. Caddy가 인증서를 발급·갱신하며 도메인의 HTTP 요청을
+HTTPS로 전환합니다. 기존 로컬 `127.0.0.1:5173` 접속과 컨테이너 헬스체크는 유지됩니다.
+`deploy/Caddyfile`은 읽기 전용으로 마운트하므로 설정 변경 후 Caddy를 재시작합니다.
+도메인을 설정하지 않으면 추가 포트는 기본적으로 로컬 8080·8443에만 바인딩됩니다.
