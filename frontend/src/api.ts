@@ -1,12 +1,17 @@
 import type { CreateGamePayload, CursorPage, Game, GameDetail, GameOption, GameOptionPayload, GamePayload, Meetup, MeetupPayload, Participation, Problem, TokenPair } from './types'
+import { problemMessage } from './feedback'
 import { getAccessToken, setAccessToken } from './auth'
 
 const base = import.meta.env.VITE_API_BASE_URL ?? ''
-export class ApiError extends Error { constructor(public status:number, public problem:Problem){super(problem.detail || problem.title || '요청을 처리하지 못했습니다.')} }
+export class ApiError extends Error { constructor(public status:number, public problem:Problem, public retryAt?:number){super(problemMessage(status,problem))} }
 async function request<T>(path:string, init:RequestInit = {}):Promise<T> {
   const token = getAccessToken()
-  const response = await fetch(`${base}${path}`, { ...init, signal:init.signal??AbortSignal.timeout(10_000), headers:{'Content-Type':'application/json', ...(token?{Authorization:`Bearer ${token}`} : {}), ...init.headers} })
-  if (!response.ok) { let problem:Problem={}; try{problem=await response.json()}catch{problem={detail:`HTTP ${response.status}`}}; if(response.status===401&&token)setAccessToken(null,'expired'); throw new ApiError(response.status,problem) }
+  let response:Response
+  try { response = await fetch(`${base}${path}`, { ...init, signal:init.signal??AbortSignal.timeout(10_000), headers:{'Content-Type':'application/json', ...(token?{Authorization:`Bearer ${token}`} : {}), ...init.headers} }) } catch(error) {
+    if(init.signal?.aborted)throw error
+    throw new ApiError(0,{detail:error instanceof DOMException&&error.name==='TimeoutError'?'서버 응답이 늦어지고 있습니다. 잠시 후 다시 시도해 주세요.':undefined})
+  }
+  if (!response.ok) { let problem:Problem={}; try{const body:unknown=await response.json();if(body&&typeof body==='object'&&!Array.isArray(body)){const value=body as Record<string,unknown>;problem={title:typeof value.title==='string'?value.title:undefined,detail:typeof value.detail==='string'?value.detail:undefined,code:typeof value.code==='string'?value.code:undefined,traceId:typeof value.traceId==='string'?value.traceId:undefined,fieldErrors:Array.isArray(value.fieldErrors)?value.fieldErrors.filter((item):item is {field:string;reason:string}=>!!item&&typeof item.field==='string'&&typeof item.reason==='string'):undefined}}}catch{problem={detail:`HTTP ${response.status}`}}; if(response.status===401&&token)setAccessToken(null,'expired'); const retryAfter=response.headers.get('Retry-After');const seconds=retryAfter===null?NaN:Number(retryAfter);const retryAt=retryAfter===null?undefined:Number.isFinite(seconds)?Date.now()+Math.max(0,seconds)*1000:Date.parse(retryAfter);throw new ApiError(response.status,problem,retryAt) }
   if (response.status===204) return undefined as T
   return response.json()
 }
