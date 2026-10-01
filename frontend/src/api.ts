@@ -16,6 +16,10 @@ async function request<T>(path:string, init:RequestInit = {}):Promise<T> {
   return response.json()
 }
 export const api = {
+  riotStatus:()=>request<{enabled:boolean;linked:boolean;riotId:string|null}>('/api/v1/members/me/riot'),
+  riotStart:()=>request<{authorizationUrl:string}>('/api/v1/members/me/riot/authorization',{method:'POST'}),
+  riotComplete:(code:string)=>request<void>('/api/v1/members/me/riot',{method:'POST',body:JSON.stringify({code})}),
+  riotUnlink:()=>request<void>('/api/v1/members/me/riot',{method:'DELETE'}),
   games:()=>request<Game[]>('/api/v1/games'),
   game:(id:number)=>request<GameDetail>(`/api/v1/games/${id}`),
   createGame:(body:CreateGamePayload)=>request<GameDetail>('/api/v1/admin/games',{method:'POST',headers:{'Idempotency-Key':crypto.randomUUID()},body:JSON.stringify(body)}),
@@ -23,7 +27,7 @@ export const api = {
   createGameOption:(gameId:number,body:GameOptionPayload)=>request<GameOption>(`/api/v1/admin/games/${gameId}/options`,{method:'POST',headers:{'Idempotency-Key':crypto.randomUUID()},body:JSON.stringify(body)}),
   updateGameOption:(gameId:number,optionId:number,body:GameOptionPayload)=>request<GameOption>(`/api/v1/admin/games/${gameId}/options/${optionId}`,{method:'PUT',headers:{'Idempotency-Key':crypto.randomUUID()},body:JSON.stringify(body)}),
   deleteGameOption:(gameId:number,optionId:number)=>request<void>(`/api/v1/admin/games/${gameId}/options/${optionId}`,{method:'DELETE',headers:{'Idempotency-Key':crypto.randomUUID()}}),
-  meetups:(gameId?:number,cursor?:number)=>request<CursorPage<Meetup>>(`/api/v1/meetups?size=20${gameId?`&gameId=${gameId}`:''}${cursor?`&cursor=${cursor}`:''}`),
+  meetups:(gameId?:number,cursor?:number,regionOptionId?:number)=>request<CursorPage<Meetup>>(`/api/v1/meetups?size=20${gameId?`&gameId=${gameId}`:''}${cursor?`&cursor=${cursor}`:''}${regionOptionId?`&regionOptionId=${regionOptionId}`:''}`),
   meetup:(id:number)=>request<Meetup>(`/api/v1/meetups/${id}`),
   createMeetup:(body:MeetupPayload)=>request<Meetup>('/api/v1/meetups',{method:'POST',headers:{'Idempotency-Key':crypto.randomUUID()},body:JSON.stringify(body)}),
   updateMeetup:(id:number,body:MeetupPayload)=>request<Meetup>(`/api/v1/meetups/${id}`,{method:'PUT',headers:{'Idempotency-Key':crypto.randomUUID()},body:JSON.stringify(body)}),
