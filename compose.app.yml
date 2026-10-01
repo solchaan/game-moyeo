@@ -31,6 +31,11 @@ services:
       dockerfile: backend/Dockerfile
     restart: unless-stopped
     environment:
+      RIOT_RSO_ENABLED: ${RIOT_RSO_ENABLED:-false}
+      RIOT_RSO_CLIENT_ID: ${RIOT_RSO_CLIENT_ID:-}
+      RIOT_RSO_CLIENT_SECRET: ${RIOT_RSO_CLIENT_SECRET:-}
+      RIOT_RSO_CALLBACK_URI: ${RIOT_RSO_CALLBACK_URI:-https://gamemoyeo.noroo.kr/api/v1/riot/callback}
+      RIOT_RSO_FRONTEND_URI: ${RIOT_RSO_FRONTEND_URI:-https://gamemoyeo.noroo.kr/riot/callback}
       SPRING_PROFILES_ACTIVE: prod
       DB_URL: jdbc:mariadb://mariadb:3306/gamemoyeo
       DB_USERNAME: gamemoyeo

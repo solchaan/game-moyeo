@@ -9,6 +9,8 @@
 	encode zstd gzip
 	header X-Content-Type-Options nosniff
 	header Referrer-Policy strict-origin-when-cross-origin
+	header /riot/callback Referrer-Policy no-referrer
+	header /riot/callback Cache-Control no-store
 
 	handle /healthz {
 		respond "ok" 200

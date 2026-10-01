@@ -39,6 +39,12 @@ spring:
       enabled: true
 
 app:
+  riot:
+    enabled: ${RIOT_RSO_ENABLED:false}
+    client-id: ${RIOT_RSO_CLIENT_ID:}
+    client-secret: ${RIOT_RSO_CLIENT_SECRET:}
+    callback-uri: ${RIOT_RSO_CALLBACK_URI:https://gamemoyeo.noroo.kr/api/v1/riot/callback}
+    frontend-uri: ${RIOT_RSO_FRONTEND_URI:https://gamemoyeo.noroo.kr/riot/callback}
   security:
     enabled: ${SECURITY_ENABLED:true}
   cors:

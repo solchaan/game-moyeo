@@ -210,3 +210,8 @@ APP_LOGIN_REDIRECT_URI=https://gamemoyeo.noroo.kr/oauth/callback
 HTTPS로 전환합니다. 기존 로컬 `127.0.0.1:5173` 접속과 컨테이너 헬스체크는 유지됩니다.
 `deploy/Caddyfile`은 읽기 전용으로 마운트하므로 설정 변경 후 Caddy를 재시작합니다.
 도메인을 설정하지 않으면 추가 포트는 기본적으로 로컬 8080·8443에만 바인딩됩니다.
+
+### Riot 계정 연결
+
+로그인 후 `/account`에서 Riot 계정을 연결합니다. RSO 승인 전에는 연결 기능이 비활성화됩니다.
+승인 후 설정할 콜백 주소, 환경 변수, 인증 흐름과 API 계약은 [Riot 계정 연결 문서](docs/riot-account-link.md)를 참고하세요.
