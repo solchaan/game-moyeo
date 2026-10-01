@@ -57,9 +57,17 @@ public class MeetupBoardService implements MeetupBoardUseCase {
     }
 
     @Override
-    public CursorPage findAll(Long gameId, Long cursor, int size) {
+    public CursorPage findAll(Long gameId, Long regionOptionId, Long cursor, int size) {
+        if (regionOptionId != null) {
+            if (gameId == null) {
+                throw invalid("A game is required for a server filter.", "gameId", "서버를 선택하려면 게임을 먼저 선택해 주세요.");
+            }
+            Map<Long, OptionView> options = new HashMap<>();
+            catalog.findGame(gameId).options().forEach(option -> options.put(option.id(), option));
+            require(options, regionOptionId, OptionType.REGION, "regionOptionId");
+        }
         int pageSize = Math.min(Math.max(size, 1), 100);
-        List<MeetupView> values = port.findAll(gameId, cursor, pageSize + 1);
+        List<MeetupView> values = port.findAll(gameId, regionOptionId, cursor, pageSize + 1);
         boolean hasNext = values.size() > pageSize;
         List<MeetupView> items = hasNext ? values.subList(0, pageSize) : values;
         Long nextCursor = hasNext ? items.get(items.size() - 1).id() : null;

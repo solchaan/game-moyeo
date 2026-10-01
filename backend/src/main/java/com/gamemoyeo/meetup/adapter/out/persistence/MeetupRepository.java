@@ -17,4 +17,8 @@ interface MeetupRepository extends JpaRepository<MeetupJpaEntity, Long> {
         long cursor,
         Pageable pageable
     );
+    @EntityGraph(attributePaths = {"session", "roleRequirements"})
+    List<MeetupJpaEntity> findByStatusAndGameIdAndRegionOptionIdAndIdLessThanOrderByIdDesc(
+        String status, long gameId, long regionOptionId, long cursor, Pageable pageable
+    );
 }

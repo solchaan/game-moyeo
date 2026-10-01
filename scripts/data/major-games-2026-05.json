@@ -29,6 +29,7 @@
         {"type":"TIER","code":"CHALLENGER","displayName":"챌린저","sortOrder":100,"metadata":null},
         {"type":"PLATFORM","code":"PC","displayName":"PC","sortOrder":10,"metadata":null},
         {"type":"REGION","code":"KR","displayName":"대한민국","sortOrder":10,"metadata":null},
+        {"type":"REGION","code":"NA","displayName":"북미","sortOrder":20,"metadata":null},
         {"type":"MAP","code":"SUMMONERS_RIFT","displayName":"소환사의 협곡","sortOrder":10,"metadata":null},
         {"type":"MAP","code":"HOWLING_ABYSS","displayName":"칼바람 나락","sortOrder":20,"metadata":null}
       ]

@@ -48,11 +48,13 @@ public class MeetupBoardController {
 
     @GetMapping
     CursorPage findAll(
-        @RequestParam(required = false) Long gameId,
+        @RequestParam(required = false) @Positive Long gameId,
+        @io.swagger.v3.oas.annotations.Parameter(description = "Active REGION option of gameId. Requires gameId; omitted means all servers, including unspecified legacy parties.")
+        @RequestParam(required = false) @Positive Long regionOptionId,
         @RequestParam(required = false) Long cursor,
         @RequestParam(defaultValue = "20") int size
     ) {
-        return useCase.findAll(gameId, cursor, size);
+        return useCase.findAll(gameId, regionOptionId, cursor, size);
     }
 
     @GetMapping("/{meetupId}")

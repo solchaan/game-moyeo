@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -87,6 +88,23 @@ class MeetupBoardControllerTest {
                 .content(payload(start.toString())))
             .andExpect(status().isCreated())
             .andExpect(jsonPath("$.id").value(99));
+    }
+
+    @Test
+    void serverQueryIsPassedToUseCase() throws Exception {
+        when(useCase.findAll(1L, 10L, 200L, 2)).thenReturn(
+            new MeetupBoardUseCase.CursorPage(java.util.List.of(), null, false));
+        mvc.perform(get("/api/v1/meetups?gameId=1&regionOptionId=10&cursor=200&size=2"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.items").isEmpty())
+            .andExpect(jsonPath("$.hasNext").value(false));
+    }
+
+    @Test
+    void rejectsNonpositiveServerId() throws Exception {
+        mvc.perform(get("/api/v1/meetups?gameId=1&regionOptionId=0"))
+            .andExpect(status().isBadRequest());
+        verifyNoInteractions(useCase);
     }
 
     private String payload(String startsAt) {

@@ -54,10 +54,13 @@ public class MeetupBoardPersistenceAdapter implements MeetupBoardPort {
     }
 
     @Override
-    public List<MeetupView> findAll(Long gameId, Long cursor, int limit) {
+    public List<MeetupView> findAll(Long gameId, Long regionOptionId, Long cursor, int limit) {
         long before = cursor == null ? Long.MAX_VALUE : cursor;
         var page = PageRequest.of(0, limit);
-        List<MeetupJpaEntity> meetups = gameId == null
+        List<MeetupJpaEntity> meetups = regionOptionId != null
+            ? repository.findByStatusAndGameIdAndRegionOptionIdAndIdLessThanOrderByIdDesc(
+                "OPEN", gameId, regionOptionId, before, page)
+            : gameId == null
             ? repository.findByStatusAndIdLessThanOrderByIdDesc("OPEN", before, page)
             : repository.findByStatusAndGameIdAndIdLessThanOrderByIdDesc("OPEN", gameId, before, page);
         return meetups.stream().map(this::view).toList();

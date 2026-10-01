@@ -96,6 +96,36 @@ class MeetupBoardServiceTest {
             .satisfies(error -> assertThat(((ApiException) error).fieldErrors()).containsKey("endsAt"));
     }
 
+    @Test
+    void filtersByValidatedServerAndRetainsCursorPagination() {
+        when(catalog.findGame(1L)).thenReturn(game(10L, OptionType.REGION));
+        when(port.findAll(1L, 10L, 200L, 2)).thenReturn(List.of(view(), view()));
+        var page = service.findAll(1L, 10L, 200L, 1);
+        assertThat(page.items()).hasSize(1);
+        assertThat(page.hasNext()).isTrue();
+        assertThat(page.nextCursor()).isEqualTo(99L);
+        verify(port).findAll(1L, 10L, 200L, 2);
+    }
+
+    @Test
+    void rejectsServerWithoutGameOrFromAnotherGame() {
+        assertThatThrownBy(() -> service.findAll(null, 10L, null, 20))
+            .isInstanceOf(ApiException.class);
+        when(catalog.findGame(1L)).thenReturn(game(11L, OptionType.REGION));
+        assertThatThrownBy(() -> service.findAll(1L, 10L, null, 20))
+            .isInstanceOf(ApiException.class)
+            .satisfies(error -> assertThat(((ApiException) error).fieldErrors()).containsKey("regionOptionId"));
+    }
+
+    @Test
+    void preservesUnfilteredListingWithoutServer() {
+        when(port.findAll(null, null, null, 21)).thenReturn(List.of(view()));
+        var page = service.findAll(null, null, null, 20);
+        assertThat(page.hasNext()).isFalse();
+        assertThat(page.nextCursor()).isNull();
+        assertThat(page.items()).hasSize(1);
+    }
+
     private MeetupCommand command(long modeOptionId) {
         Instant start = Instant.now().plusSeconds(3600);
         return new MeetupCommand(1L, modeOptionId, null, null, null, null, "Rank game", null,

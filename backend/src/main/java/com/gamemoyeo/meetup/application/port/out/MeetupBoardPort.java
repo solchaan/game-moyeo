@@ -14,5 +14,5 @@ public interface MeetupBoardPort {
 
     MeetupView find(long meetupId);
 
-    List<MeetupView> findAll(Long gameId, Long cursor, int limit);
+    List<MeetupView> findAll(Long gameId, Long regionOptionId, Long cursor, int limit);
 }

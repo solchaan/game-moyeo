@@ -14,7 +14,7 @@ public interface MeetupBoardUseCase {
 
     MeetupView find(long meetupId);
 
-    CursorPage findAll(Long gameId, Long cursor, int size);
+    CursorPage findAll(Long gameId, Long regionOptionId, Long cursor, int size);
 
     record MeetupCommand(
         long gameId,
