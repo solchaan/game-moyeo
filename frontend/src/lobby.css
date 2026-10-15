@@ -1,4 +1,4 @@
-#root:has(.lobby-page, .member-auth-page, .meetup-page) {
+#root:has(.lobby-page, .member-auth-page, .meetup-page, .riot-account-page) {
   --lobby-paper: #f8f8f2;
   --lobby-ink: #242920;
   --lobby-muted: #697061;
@@ -9,13 +9,13 @@
   --lobby-hover: #404a35;
   --lobby-radius: 6px;
 }
-#root:has(.lobby-page, .member-auth-page, .meetup-page) > header { border-color: var(--lobby-line); background: var(--lobby-paper); backdrop-filter: none; }
-#root:has(.lobby-page, .member-auth-page, .meetup-page) > header .login { border-color: var(--lobby-line); border-radius: 6px; background: transparent; box-shadow: none; color: var(--lobby-ink); }
-#root:has(.lobby-page, .member-auth-page, .meetup-page) > header nav > a:not(.login):hover { color: #456615; }
-#root:has(.lobby-page, .member-auth-page, .meetup-page) > header nav > a:not(.login)::after { background: var(--lobby-ink); }
-#root:has(.lobby-page, .member-auth-page, .meetup-page) > footer { min-height: 90px; border-top: 1px solid var(--lobby-line); background: var(--lobby-paper); color: var(--lobby-ink); }
-#root:has(.lobby-page, .member-auth-page, .meetup-page) > footer > span { color: var(--lobby-muted); }
-#root:has(.lobby-page, .member-auth-page, .meetup-page) > footer .footer-mark { background: var(--lobby-accent); }
+#root:has(.lobby-page, .member-auth-page, .meetup-page, .riot-account-page) > header { border-color: var(--lobby-line); background: var(--lobby-paper); backdrop-filter: none; }
+#root:has(.lobby-page, .member-auth-page, .meetup-page, .riot-account-page) > header .login { border-color: var(--lobby-line); border-radius: 6px; background: transparent; box-shadow: none; color: var(--lobby-ink); }
+#root:has(.lobby-page, .member-auth-page, .meetup-page, .riot-account-page) > header nav > a:not(.login):hover { color: #456615; }
+#root:has(.lobby-page, .member-auth-page, .meetup-page, .riot-account-page) > header nav > a:not(.login)::after { background: var(--lobby-ink); }
+#root:has(.lobby-page, .member-auth-page, .meetup-page, .riot-account-page) > footer { min-height: 90px; border-top: 1px solid var(--lobby-line); background: var(--lobby-paper); color: var(--lobby-ink); }
+#root:has(.lobby-page, .member-auth-page, .meetup-page, .riot-account-page) > footer > span { color: var(--lobby-muted); }
+#root:has(.lobby-page, .member-auth-page, .meetup-page, .riot-account-page) > footer .footer-mark { background: var(--lobby-accent); }
 .lobby-page {
   min-height: calc(100vh - 76px);
   background: var(--lobby-paper);

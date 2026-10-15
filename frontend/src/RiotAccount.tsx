@@ -4,6 +4,7 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { LeagueProfile } from './Positions'
 import { api } from './api'
+import './account.css'
 
 export default function RiotAccountPage() {
   useLocale()
@@ -63,12 +64,23 @@ export default function RiotAccountPage() {
   }
   const busy = waiting || complete.isPending || unlink.isPending
   return <section className="riot-account-page">
-    <Link to="/">{t("← 모임 찾기")}</Link>
-    <h1>{t("게임 계정 연결")}</h1>
+    <Link className="back" to="/">{t("← 모임 찾기")}</Link>
+    <div className="account-layout">
+    <div className="account-intro">
+      <p className="lobby-kicker">MY ACCOUNT</p>
+      <h1>{t("게임 계정 연결")}</h1>
+      <p>{t('내 플레이 스타일과 게임 계정을 한곳에서 관리하세요.')}</p>
+      <nav aria-label={t('계정 설정 항목')}>
+        <a href="#league-profile"><span>01 /</span>{t('롤 프로필')}</a>
+        <a href="#riot-connection"><span>02 /</span>{t('Riot 계정 연결')}</a>
+      </nav>
+    </div>
+    <div className="account-panels">
     <LeagueProfile/>
-    <p>{t("게임모여 계정에 본인의 Riot 계정을 연결합니다. 리그 오브 레전드와 VALORANT에서 사용하는 계정입니다.")}</p>
-    <article className="riot-account-card">
+    <article className="riot-account-card" id="riot-connection">
+      <p className="lobby-kicker">02 / RIOT GAMES</p>
       <h2>Riot Games</h2>
+      <p>{t("게임모여 계정에 본인의 Riot 계정을 연결합니다. 리그 오브 레전드와 VALORANT에서 사용하는 계정입니다.")}</p>
       {status.isPending ? <p role="status">{t("연결 상태를 확인하고 있어요.")}</p> : status.error ?
         <div role="alert"><p>{status.error.message}</p><button onClick={() => void status.refetch()}>{t("다시 시도")}</button></div> : <>
           <p>{status.data?.linked ? <>{t("연결된 Riot ID:")}<strong>{status.data.riotId}</strong></> : t("아직 연결된 계정이 없습니다.")}</p>
@@ -83,7 +95,9 @@ export default function RiotAccountPage() {
         </>}
       {message && <p role="status" aria-live="polite">{t(message)}</p>}
     </article>
-    <p>{t("인증은 Riot 공식 창에서 진행됩니다. 연결을 완료하면 계정 식별자와 Riot ID를 저장하며, 계정 비밀번호는 받지 않습니다.")}</p>
+    <p className="account-note">{t("인증은 Riot 공식 창에서 진행됩니다. 연결을 완료하면 계정 식별자와 Riot ID를 저장하며, 계정 비밀번호는 받지 않습니다.")}</p>
+    </div>
+    </div>
   </section>
 }
 
