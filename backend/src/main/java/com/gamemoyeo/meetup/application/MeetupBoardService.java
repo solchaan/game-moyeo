@@ -78,9 +78,6 @@ public class MeetupBoardService implements MeetupBoardUseCase {
         if (!command.startsAt().isAfter(Instant.now().plus(Duration.ofMinutes(10)))) {
             throw invalid("Meetup must start more than 10 minutes from now.", "startsAt", "시작 시간은 현재보다 10분 넘게 뒤로 설정해 주세요.");
         }
-        if (!command.endsAt().isAfter(command.startsAt())) {
-            throw invalid("Meetup time range is invalid.", "endsAt", "종료 시간은 시작 시간보다 뒤로 설정해 주세요.");
-        }
         if (command.recruitmentDeadline() != null
             && !command.recruitmentDeadline().isBefore(command.startsAt())) {
             throw invalid("Recruitment deadline must be before start time.", "recruitmentDeadline", "모집 마감 시간은 시작 시간보다 앞으로 설정해 주세요.");
@@ -91,6 +88,12 @@ public class MeetupBoardService implements MeetupBoardUseCase {
         }
         Map<Long, OptionView> options = new HashMap<>();
         game.options().forEach(option -> options.put(option.id(), option));
+        require(options, command.mapOptionId(), OptionType.MAP, "mapOptionId");
+        OptionView map = options.get(command.mapOptionId());
+        if (!command.roleRequirements().isEmpty() && (map == null || !map.roleSelectionAllowed())) {
+            throw invalid("Role requirements are only allowed on Summoner's Rift.", "roleRequirements",
+                "포지션별 모집은 소환사의 협곡 맵에서만 설정할 수 있습니다.");
+        }
         require(options, command.modeOptionId(), OptionType.MODE, "modeOptionId");
         require(options, command.platformOptionId(), OptionType.PLATFORM, "platformOptionId");
         require(options, command.regionOptionId(), OptionType.REGION, "regionOptionId");

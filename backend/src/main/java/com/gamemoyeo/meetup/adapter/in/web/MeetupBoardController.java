@@ -116,9 +116,10 @@ public class MeetupBoardController {
         @NotBlank @Pattern(regexp = "^(FIRST_COME|OWNER_APPROVAL)$") String approvalType,
         Instant recruitmentDeadline,
         @NotNull @Future Instant startsAt,
-        @NotNull @Future Instant endsAt,
         @Positive @Max(100) int capacity,
-        @Valid @Size(max = 20) List<RoleRequirementRequest> roleRequirements
+        @Valid @Size(max = 20) List<RoleRequirementRequest> roleRequirements,
+        @Schema(description = "Active MAP option of the selected game. Role requirements are allowed only on SUMMONERS_RIFT.")
+        @Positive Long mapOptionId
     ) {
         MeetupCommand command() {
             Map<Long, Integer> roles = new HashMap<>();
@@ -132,7 +133,7 @@ public class MeetupBoardController {
             }
             return new MeetupCommand(gameId, modeOptionId, platformOptionId, regionOptionId,
                 minimumTierOptionId, maximumTierOptionId, title, description, playStyle, voiceChatPolicy,
-                approvalType, recruitmentDeadline, startsAt, endsAt, capacity, roles);
+                approvalType, recruitmentDeadline, startsAt, capacity, roles, mapOptionId);
         }
     }
 

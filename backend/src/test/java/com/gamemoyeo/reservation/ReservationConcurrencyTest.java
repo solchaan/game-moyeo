@@ -51,9 +51,9 @@ class ReservationConcurrencyTest {
         Instant startsAt = Instant.now().plus(2, ChronoUnit.HOURS);
         jdbc.update("""
             INSERT INTO meetup_session
-                (id, meetup_id, starts_at, ends_at, capacity, reserved_count)
-            VALUES (1, 1, ?, ?, ?, 1)
-            """, Timestamp.from(startsAt), Timestamp.from(startsAt.plus(1, ChronoUnit.HOURS)), CAPACITY);
+                (id, meetup_id, starts_at, capacity, reserved_count)
+            VALUES (1, 1, ?, ?, 1)
+            """, Timestamp.from(startsAt), CAPACITY);
         jdbc.update("""
             INSERT INTO reservation (session_id, member_id, party_size, status)
             VALUES (1, 1, 1, 'CONFIRMED')

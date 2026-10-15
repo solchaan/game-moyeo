@@ -6,7 +6,7 @@ const emptyPage = { items: [], nextCursor: null, hasNext: false }
 const party = {
   id: 41, gameId: 1, ownerId: 1, title: '오늘 저녁 가볍게 한 판 같이 해요',
   description: '', playStyle: 'CASUAL', voiceChatPolicy: 'OPTIONAL', approvalType: 'FIRST_COME',
-  startsAt: '2026-10-01T12:00:00Z', endsAt: '2026-10-01T14:00:00Z',
+  startsAt: '2026-10-01T12:00:00Z',
   reservedCount: 2, capacity: 5, status: 'OPEN', roleRequirements: {},
 }
 
@@ -138,6 +138,8 @@ test('defaults creation to League, submits positions, and clears them when switc
   const token = `e30.${Buffer.from(JSON.stringify({ sub: '7', exp: Math.floor(Date.now() / 1000) + 3600, roles: ['MEMBER'] })).toString('base64url')}.test`
   await page.route('**/api/v1/auth/login', route => route.fulfill({ json: { accessToken: token } }))
   await page.route('**/api/v1/games/1', route => route.fulfill({ json: { game: games[0], options: [...regions,
+    { id: 40, type: 'MAP', code: 'SUMMONERS_RIFT', displayName: '소환사의 협곡', active: true, roleSelectionAllowed: true },
+    { id: 41, type: 'MAP', code: 'HOWLING_ABYSS', displayName: '칼바람 나락', active: true, roleSelectionAllowed: false },
     { id: 30, type: 'ROLE', displayName: '서포터', active: true },
   ] } }))
   await page.goto('/meetups/new')
@@ -146,11 +148,12 @@ test('defaults creation to League, submits positions, and clears them when switc
   await page.getByRole('button', { name: '로그인 →', exact: true }).click()
   await expect(page.getByRole('heading', { name: '함께할 롤 파티원을 모집해요' })).toBeVisible()
   await expect(page.getByRole('combobox', { name: '게임', exact: true })).toHaveValue('1')
+  await expect(page.getByLabel('서포터', { exact: true })).toHaveCount(0)
+  await page.getByRole('combobox', { name: '맵', exact: true }).selectOption('40')
   await page.getByLabel('서포터', { exact: true }).fill('1')
   await page.getByLabel('모임 제목').fill('함께할 서포터 구해요')
   await page.getByLabel('시작 시간').fill('2099-10-01T18:00')
-  await page.getByLabel('종료 시간').fill('2099-10-01T20:00')
-  const bodies: { gameId: number; roleRequirements: {roleOptionId: number; capacity: number}[] }[] = []
+  const bodies: { gameId: number; mapOptionId: number | null; roleRequirements: {roleOptionId: number; capacity: number}[] }[] = []
   await page.route('**/api/v1/meetups', route => {
     bodies.push(route.request().postDataJSON())
     return route.fulfill({ status: 400, json: { detail: '입력 내용을 확인해 주세요.' } })
@@ -159,11 +162,22 @@ test('defaults creation to League, submits positions, and clears them when switc
   await expect.poll(() => bodies.length).toBe(1)
   expect(bodies[0].gameId).toBe(1)
   expect(bodies[0].roleRequirements).toEqual([{ roleOptionId: 30, capacity: 1 }])
-  await page.getByRole('combobox', { name: '게임', exact: true }).selectOption('3')
+  expect(bodies[0].mapOptionId).toBe(40)
+  await page.getByRole('combobox', { name: '맵', exact: true }).selectOption('41')
+  await expect(page.getByLabel('서포터', { exact: true })).toHaveCount(0)
   await page.getByRole('button', { name: '모임 만들기 →' }).click()
   await expect.poll(() => bodies.length).toBe(2)
-  expect(bodies[1].gameId).toBe(3)
+  expect(bodies[1].mapOptionId).toBe(41)
   expect(bodies[1].roleRequirements).toEqual([])
+  await page.getByRole('combobox', { name: '맵', exact: true }).selectOption('40')
+  await expect(page.getByLabel('서포터', { exact: true })).toHaveValue('0')
+  await page.getByLabel('서포터', { exact: true }).fill('1')
+  await page.getByRole('combobox', { name: '게임', exact: true }).selectOption('3')
+  await page.getByRole('button', { name: '모임 만들기 →' }).click()
+  await expect.poll(() => bodies.length).toBe(3)
+  expect(bodies[2].gameId).toBe(3)
+  expect(bodies[2].mapOptionId).toBeNull()
+  expect(bodies[2].roleRequirements).toEqual([])
 })
 
 test('language and server choices persist independently with server pagination', async ({ page }) => {
@@ -212,7 +226,6 @@ test('English NA creation keeps selected server through login and language chang
   await expect(page.getByRole('combobox', { name: '서버', exact: true })).toHaveValue('102')
   await expect(page.getByRole('textbox', { name: '모임 제목', exact: true })).toHaveValue('NA duo tonight')
   await page.getByLabel('시작 시간').fill('2099-10-01T18:00')
-  await page.getByLabel('종료 시간').fill('2099-10-01T20:00')
   let submitted: Record<string, unknown> | undefined
   await page.route('**/api/v1/meetups', route => { submitted = route.request().postDataJSON(); return route.fulfill({ status: 400, json: { detail: '입력한 내용을 확인해 주세요.' } }) })
   await page.getByRole('button', { name: '모임 만들기 →' }).click()

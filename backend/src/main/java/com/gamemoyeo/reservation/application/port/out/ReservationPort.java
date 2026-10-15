@@ -5,6 +5,10 @@ import java.util.Optional;
 
 public interface ReservationPort {
 
+    record PositionContext(long gameId, Long mapOptionId) { }
+    PositionContext positionContext(long meetupId);
+    void savePositions(long sessionId, long memberId, com.gamemoyeo.member.domain.PositionPreferences positions);
+
     boolean initializeOwner(long meetupId, long ownerId);
 
     Optional<ReservationState> findState(long meetupId, Long memberId);

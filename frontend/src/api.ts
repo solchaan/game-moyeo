@@ -1,4 +1,4 @@
-import type { CreateGamePayload, CursorPage, Game, GameDetail, GameOption, GameOptionPayload, GamePayload, Meetup, MeetupPayload, Participation, Problem, TokenPair } from './types'
+import type { PositionPreferences, CreateGamePayload, CursorPage, Game, GameDetail, GameOption, GameOptionPayload, GamePayload, Meetup, MeetupPayload, Participation, Problem, TokenPair } from './types'
 import { problemMessage } from './feedback'
 import { getAccessToken, setAccessToken } from './auth'
 
@@ -16,6 +16,9 @@ async function request<T>(path:string, init:RequestInit = {}):Promise<T> {
   return response.json()
 }
 export const api = {
+  gameProfile:(gameId:number)=>request<PositionPreferences>(`/api/v1/members/me/games/${gameId}/profile`),
+  saveGameProfile:(gameId:number,body:PositionPreferences)=>request<PositionPreferences>(`/api/v1/members/me/games/${gameId}/profile`,{method:'PUT',body:JSON.stringify(body)}),
+  participationPreferences:(id:number)=>request<{enabled:boolean;positions:PositionPreferences}>(`/api/v1/meetups/${id}/participation/preferences`),
   riotStatus:()=>request<{enabled:boolean;linked:boolean;riotId:string|null}>('/api/v1/members/me/riot'),
   riotStart:()=>request<{authorizationUrl:string}>('/api/v1/members/me/riot/authorization',{method:'POST'}),
   riotComplete:(code:string)=>request<void>('/api/v1/members/me/riot',{method:'POST',body:JSON.stringify({code})}),
@@ -33,7 +36,7 @@ export const api = {
   updateMeetup:(id:number,body:MeetupPayload)=>request<Meetup>(`/api/v1/meetups/${id}`,{method:'PUT',headers:{'Idempotency-Key':crypto.randomUUID()},body:JSON.stringify(body)}),
   deleteMeetup:(id:number)=>request<void>(`/api/v1/meetups/${id}`,{method:'DELETE',headers:{'Idempotency-Key':crypto.randomUUID()}}),
   participation:(id:number)=>request<Participation>(`/api/v1/meetups/${id}/participation`),
-  participate:(id:number)=>request<Participation>(`/api/v1/meetups/${id}/reservations`,{method:'POST',headers:{'Idempotency-Key':crypto.randomUUID()}}),
+  participate:(id:number,positions:PositionPreferences)=>request<Participation>(`/api/v1/meetups/${id}/reservations`,{method:'POST',headers:{'Idempotency-Key':crypto.randomUUID()},body:JSON.stringify(positions)}),
   cancelParticipation:(id:number)=>request<Participation>(`/api/v1/meetups/${id}/reservations/me`,{method:'DELETE',headers:{'Idempotency-Key':crypto.randomUUID()}}),
   closeParticipation:(id:number)=>request<Participation>(`/api/v1/meetups/${id}/close`,{method:'POST',headers:{'Idempotency-Key':crypto.randomUUID()}}),
   exchange:(code:string)=>request<TokenPair>('/api/v1/auth/token',{method:'POST',body:JSON.stringify({code})}),

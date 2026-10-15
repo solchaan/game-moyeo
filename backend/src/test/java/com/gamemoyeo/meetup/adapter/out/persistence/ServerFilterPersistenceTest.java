@@ -26,6 +26,23 @@ class ServerFilterPersistenceTest {
     MeetupBoardUseCase board;
 
     @Test
+    void createsAndUpdatesMeetupWithoutEndTime() {
+        jdbc.update("INSERT INTO member (id, nickname) VALUES (901, 'schedule-host')");
+        jdbc.update("INSERT INTO game (id, slug, name) VALUES (901, 'schedule-test', 'Schedule test')");
+        var start = java.time.Instant.parse("2099-01-01T12:00:00Z");
+        var command = new MeetupBoardUseCase.MeetupCommand(901L, null, null, null, null, null,
+            "Start only", null, "CASUAL", "OPTIONAL", "FIRST_COME", null, start, 5, java.util.Map.of(), null);
+        var created = board.create(901L, command);
+        assertThat(board.find(created.id()).startsAt()).isEqualTo(start);
+        var updated = new MeetupBoardUseCase.MeetupCommand(901L, null, null, null, null, null,
+            "Updated", null, "CASUAL", "OPTIONAL", "FIRST_COME", null, start.plusSeconds(900), 5, java.util.Map.of(), null);
+        board.update(created.id(), 901L, updated);
+        assertThat(board.find(created.id()).startsAt()).isEqualTo(start.plusSeconds(900));
+        assertThat(jdbc.queryForObject("SELECT ends_at FROM meetup_session WHERE meetup_id = ?",
+            java.sql.Timestamp.class, created.id())).isNull();
+    }
+
+    @Test
     void isolatesServersBeforePaginationAndPreservesUnassignedParties() {
         jdbc.update("INSERT INTO member (id, nickname) VALUES (801, 'server-host')");
         jdbc.update("INSERT INTO game (id, slug, name) VALUES (801, 'server-test', 'Server test'), (802, 'other-server-test', 'Other')");
@@ -53,6 +70,6 @@ class ServerFilterPersistenceTest {
     private void insert(long id, long gameId, Long region, String status) {
         jdbc.update("INSERT INTO meetup (id, game_id, owner_id, title, region_option_id, status) VALUES (?, ?, 801, 'Party', ?, ?)",
             id, gameId, region, status);
-        jdbc.update("INSERT INTO meetup_session (meetup_id, starts_at, ends_at, capacity) VALUES (?, '2099-01-01 12:00:00', '2099-01-01 14:00:00', 5)", id);
+        jdbc.update("INSERT INTO meetup_session (meetup_id, starts_at, capacity) VALUES (?, '2099-01-01 12:00:00', 5)", id);
     }
 }

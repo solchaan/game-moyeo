@@ -18,6 +18,20 @@ public class ReservationJdbcAdapter implements ReservationPort {
     }
 
     @Override
+    public PositionContext positionContext(long meetupId) {
+        return jdbc.query("SELECT game_id, map_option_id FROM meetup WHERE id = ? AND status <> 'DELETED'",
+            (rs, row) -> new PositionContext(rs.getLong(1), rs.getObject(2, Long.class)), meetupId)
+            .stream().findFirst().orElseThrow(() -> new com.gamemoyeo.common.exception.ApiException(
+                org.springframework.http.HttpStatus.NOT_FOUND, "MEETUP_NOT_FOUND", "Meetup was not found."));
+    }
+    @Override
+    public void savePositions(long sessionId, long memberId, com.gamemoyeo.member.domain.PositionPreferences positions) {
+        jdbc.update("UPDATE reservation SET primary_position = ?, secondary_position = ? WHERE session_id = ? AND member_id = ?",
+            positions.primaryPosition() == null ? null : positions.primaryPosition().name(),
+            positions.secondaryPosition() == null ? null : positions.secondaryPosition().name(), sessionId, memberId);
+    }
+
+    @Override
     public boolean initializeOwner(long meetupId, long ownerId) {
         return jdbc.update("""
             INSERT INTO reservation (session_id, member_id, party_size, status)

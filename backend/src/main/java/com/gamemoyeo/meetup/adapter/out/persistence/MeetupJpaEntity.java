@@ -31,6 +31,8 @@ class MeetupJpaEntity {
     long ownerId;
     @Column(name = "mode_option_id")
     Long modeOptionId;
+    @Column(name = "map_option_id")
+    Long mapOptionId;
     @Column(name = "platform_option_id")
     Long platformOptionId;
     @Column(name = "region_option_id")
@@ -79,6 +81,7 @@ class MeetupJpaEntity {
     void update(MeetupCommand command) {
         gameId = command.gameId();
         modeOptionId = command.modeOptionId();
+        mapOptionId = command.mapOptionId();
         platformOptionId = command.platformOptionId();
         regionOptionId = command.regionOptionId();
         minimumTierOptionId = command.minimumTierOptionId();

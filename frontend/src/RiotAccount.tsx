@@ -2,6 +2,7 @@ import { t, useLocale } from './locale'
 import { useEffect, useRef, useState } from 'react'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
+import { LeagueProfile } from './Positions'
 import { api } from './api'
 
 export default function RiotAccountPage() {
@@ -64,6 +65,7 @@ export default function RiotAccountPage() {
   return <section className="riot-account-page">
     <Link to="/">{t("← 모임 찾기")}</Link>
     <h1>{t("게임 계정 연결")}</h1>
+    <LeagueProfile/>
     <p>{t("게임모여 계정에 본인의 Riot 계정을 연결합니다. 리그 오브 레전드와 VALORANT에서 사용하는 계정입니다.")}</p>
     <article className="riot-account-card">
       <h2>Riot Games</h2>

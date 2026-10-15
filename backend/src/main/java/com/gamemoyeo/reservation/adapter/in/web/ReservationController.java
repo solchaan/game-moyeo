@@ -20,8 +20,16 @@ public class ReservationController {
 
     private final ReservationUseCase useCase;
 
-    public ReservationController(ReservationUseCase useCase) {
+    private final com.gamemoyeo.reservation.application.ParticipationPreferencesService preferences;
+    public ReservationController(ReservationUseCase useCase,
+        com.gamemoyeo.reservation.application.ParticipationPreferencesService preferences) {
         this.useCase = useCase;
+        this.preferences = preferences;
+    }
+    @GetMapping("/participation/preferences")
+    public com.gamemoyeo.reservation.application.ParticipationPreferencesService.PreferencesView preferences(
+        @PathVariable long meetupId, @AuthenticationPrincipal Jwt jwt) {
+        return preferences.defaults(meetupId, memberId(jwt));
     }
 
     @GetMapping("/participation")
@@ -33,9 +41,12 @@ public class ReservationController {
     ParticipationView participate(
         @PathVariable long meetupId,
         @AuthenticationPrincipal Jwt jwt,
-        @RequestHeader("Idempotency-Key") String idempotencyKey
+        @RequestHeader("Idempotency-Key") String idempotencyKey,
+        @org.springframework.web.bind.annotation.RequestBody(required = false)
+        com.gamemoyeo.member.application.port.in.PositionSelection positions
     ) {
-        return useCase.participate(meetupId, memberId(jwt), idempotencyKey);
+        return positions == null ? useCase.participate(meetupId, memberId(jwt), idempotencyKey)
+            : useCase.participate(meetupId, memberId(jwt), idempotencyKey, positions.toPreferences());
     }
 
     @DeleteMapping("/reservations/me")

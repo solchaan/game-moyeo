@@ -25,8 +25,6 @@ class MeetupSessionJpaEntity {
     MeetupJpaEntity meetup;
     @Column(name = "starts_at", nullable = false)
     Instant startsAt;
-    @Column(name = "ends_at", nullable = false)
-    Instant endsAt;
     @Column(nullable = false)
     int capacity;
     @Column(name = "reserved_count", nullable = false)
@@ -53,7 +51,6 @@ class MeetupSessionJpaEntity {
 
     void update(MeetupCommand command) {
         startsAt = command.startsAt();
-        endsAt = command.endsAt();
         capacity = command.capacity();
         if (reservedCount >= capacity && reservedCount > 0) {
             status = "CLOSED";

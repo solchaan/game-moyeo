@@ -30,9 +30,9 @@ public interface MeetupBoardUseCase {
         String approvalType,
         Instant recruitmentDeadline,
         Instant startsAt,
-        Instant endsAt,
         int capacity,
-        Map<Long, Integer> roleRequirements
+        Map<Long, Integer> roleRequirements,
+        Long mapOptionId
     ) {
     }
 
@@ -52,11 +52,11 @@ public interface MeetupBoardUseCase {
         String approvalType,
         Instant recruitmentDeadline,
         Instant startsAt,
-        Instant endsAt,
         int capacity,
         int reservedCount,
         String status,
-        Map<Long, Integer> roleRequirements
+        Map<Long, Integer> roleRequirements,
+        Long mapOptionId
     ) {
     }
 

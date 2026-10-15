@@ -87,7 +87,7 @@ public class MeetupBoardPersistenceAdapter implements MeetupBoardPort {
         return new MeetupView(meetup.id, meetup.gameId, meetup.ownerId, meetup.title, meetup.description,
             meetup.modeOptionId, meetup.platformOptionId, meetup.regionOptionId, meetup.minimumTierOptionId,
             meetup.maximumTierOptionId, meetup.playStyle, meetup.voiceChatPolicy, meetup.approvalType,
-            meetup.recruitmentDeadline, session.startsAt, session.endsAt, session.capacity, session.reservedCount,
-            meetup.status, Map.copyOf(meetup.roleRequirements));
+            meetup.recruitmentDeadline, session.startsAt, session.capacity, session.reservedCount,
+            meetup.status, Map.copyOf(meetup.roleRequirements), meetup.mapOptionId);
     }
 }

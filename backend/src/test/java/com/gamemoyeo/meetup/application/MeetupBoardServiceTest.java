@@ -79,21 +79,10 @@ class MeetupBoardServiceTest {
         Instant start = Instant.now().plusSeconds(300);
         MeetupCommand command = new MeetupCommand(1L, null, null, null, null, null,
             "Test", null, "CASUAL", "OPTIONAL", "FIRST_COME", null, start,
-            start.plusSeconds(3600), 5, Map.of());
+            5, Map.of(), null);
         assertThatThrownBy(() -> service.create(7L, command))
             .isInstanceOf(ApiException.class)
             .satisfies(error -> assertThat(((ApiException) error).fieldErrors()).containsKey("startsAt"));
-    }
-
-    @Test
-    void endBeforeStartIdentifiesEndField() {
-        Instant start = Instant.now().plusSeconds(3600);
-        MeetupCommand command = new MeetupCommand(1L, null, null, null, null, null,
-            "Test", null, "CASUAL", "OPTIONAL", "FIRST_COME", null, start,
-            start.minusSeconds(300), 5, Map.of());
-        assertThatThrownBy(() -> service.create(7L, command))
-            .isInstanceOf(ApiException.class)
-            .satisfies(error -> assertThat(((ApiException) error).fieldErrors()).containsKey("endsAt"));
     }
 
     @Test
@@ -126,18 +115,50 @@ class MeetupBoardServiceTest {
         assertThat(page.items()).hasSize(1);
     }
 
+    @Test
+    void allowsRolesOnlyOnActiveSummonersRiftForCreateAndUpdate() {
+        var game = new GameView(1L, "league-of-legends", "League", null, null, true);
+        var role = new OptionView(30L, 1L, OptionType.ROLE, "SUPPORT", "Support", 0, true, null);
+        var rift = new OptionView(40L, 1L, OptionType.MAP, "SUMMONERS_RIFT", "Rift", 0, true, null);
+        var abyss = new OptionView(41L, 1L, OptionType.MAP, "HOWLING_ABYSS", "Abyss", 1, true, null);
+        var inactive = new OptionView(42L, 1L, OptionType.MAP, "SUMMONERS_RIFT", "Old", 2, false, null);
+        when(catalog.findGame(1L)).thenReturn(new GameDetailView(game, List.of(role, rift, abyss, inactive)));
+        var valid = mapCommand(40L, Map.of(30L, 1));
+        when(port.create(7L, valid)).thenReturn(view());
+        service.create(7L, valid);
+        service.update(99L, 7L, valid);
+        verify(port).update(99L, 7L, valid);
+        for (Long mapId : java.util.Arrays.asList(null, 41L, 42L, 30L, 999L)) {
+            var invalid = mapCommand(mapId, Map.of(30L, 1));
+            assertThatThrownBy(() -> service.create(7L, invalid)).isInstanceOf(ApiException.class);
+            assertThatThrownBy(() -> service.update(99L, 7L, invalid)).isInstanceOf(ApiException.class);
+        }
+        var withoutRoles = mapCommand(41L, Map.of());
+        service.update(99L, 7L, withoutRoles);
+        verify(port).update(99L, 7L, withoutRoles);
+        assertThat(rift.roleSelectionAllowed()).isTrue();
+        assertThat(abyss.roleSelectionAllowed()).isFalse();
+        assertThat(inactive.roleSelectionAllowed()).isFalse();
+    }
+
+    private MeetupCommand mapCommand(Long mapId, Map<Long, Integer> roles) {
+        return new MeetupCommand(1L, null, null, null, null, null, "Map test", null,
+            "CASUAL", "OPTIONAL", "FIRST_COME", null, Instant.now().plusSeconds(3600),
+            5, roles, mapId);
+    }
+
     private MeetupCommand command(long modeOptionId) {
         Instant start = Instant.now().plusSeconds(3600);
         return new MeetupCommand(1L, modeOptionId, null, null, null, null, "Rank game", null,
             "COMPETITIVE", "REQUIRED", "FIRST_COME", start.minusSeconds(600), start,
-            start.plusSeconds(7200), 5, Map.of());
+            5, Map.of(), null);
     }
 
     private MeetupCommand tierCommand(long minimumTierOptionId, long maximumTierOptionId) {
         Instant start = Instant.now().plusSeconds(3600);
         return new MeetupCommand(1L, null, null, null, minimumTierOptionId, maximumTierOptionId,
             "Rank game", null, "COMPETITIVE", "REQUIRED", "FIRST_COME", start.minusSeconds(600),
-            start, start.plusSeconds(7200), 5, Map.of());
+            start, 5, Map.of(), null);
     }
 
     private GameDetailView game(long optionId, OptionType type) {
@@ -150,6 +171,6 @@ class MeetupBoardServiceTest {
         Instant start = Instant.now().plusSeconds(3600);
         return new MeetupView(99L, 1L, 7L, "Rank game", null, null, null, null, null, null,
             "COMPETITIVE", "REQUIRED", "FIRST_COME", start.minusSeconds(600), start,
-            start.plusSeconds(7200), 5, 1, "OPEN", Map.of());
+            5, 1, "OPEN", Map.of(), null);
     }
 }

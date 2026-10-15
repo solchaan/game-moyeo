@@ -49,6 +49,11 @@ public interface GameCatalogUseCase {
         boolean active,
         String metadata
     ) {
+        @com.fasterxml.jackson.annotation.JsonProperty("roleSelectionAllowed")
+        @io.swagger.v3.oas.annotations.media.Schema(description = "Whether this active map allows position requirements.")
+        public boolean roleSelectionAllowed() {
+            return active && type == OptionType.MAP && "SUMMONERS_RIFT".equals(code);
+        }
     }
 
     record GameDetailView(GameView game, List<OptionView> options) {

@@ -8,6 +8,9 @@ public interface ReservationUseCase {
 
     ParticipationView participate(long meetupId, long memberId, String idempotencyKey);
 
+    ParticipationView participate(long meetupId, long memberId, String idempotencyKey,
+        com.gamemoyeo.member.domain.PositionPreferences positions);
+
     ParticipationView cancel(long meetupId, long memberId, String idempotencyKey);
 
     ParticipationView close(long meetupId, long memberId, String idempotencyKey);

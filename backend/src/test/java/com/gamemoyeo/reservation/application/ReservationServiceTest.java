@@ -28,7 +28,10 @@ class ReservationServiceTest {
     void setUp() {
         port = mock(ReservationPort.class);
         when(port.lockMeetup(10L)).thenReturn(true);
-        service = new ReservationService(port, Clock.fixed(NOW, ZoneOffset.UTC));
+        var preferences = mock(ParticipationPreferencesService.class);
+        when(preferences.resolve(org.mockito.ArgumentMatchers.anyLong(), org.mockito.ArgumentMatchers.anyLong(),
+            org.mockito.ArgumentMatchers.any())).thenReturn(com.gamemoyeo.member.domain.PositionPreferences.empty());
+        service = new ReservationService(port, preferences, Clock.fixed(NOW, ZoneOffset.UTC));
     }
 
     @Test

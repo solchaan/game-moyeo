@@ -22,13 +22,16 @@ public class ReservationService implements ReservationUseCase {
     private final ReservationPort port;
     private final Clock clock;
 
+    private final ParticipationPreferencesService preferences;
+
     @Autowired
-    public ReservationService(ReservationPort port) {
-        this(port, Clock.systemUTC());
+    public ReservationService(ReservationPort port, ParticipationPreferencesService preferences) {
+        this(port, preferences, Clock.systemUTC());
     }
 
-    ReservationService(ReservationPort port, Clock clock) {
+    ReservationService(ReservationPort port, ParticipationPreferencesService preferences, Clock clock) {
         this.port = port;
+        this.preferences = preferences;
         this.clock = clock;
     }
 
@@ -43,12 +46,20 @@ public class ReservationService implements ReservationUseCase {
     @Override
     @Transactional
     public ParticipationView participate(long meetupId, long memberId, String idempotencyKey) {
+        return participate(meetupId, memberId, idempotencyKey, null);
+    }
+
+    @Override
+    @Transactional
+    public ParticipationView participate(long meetupId, long memberId, String idempotencyKey,
+        com.gamemoyeo.member.domain.PositionPreferences positions) {
         validateIdempotencyKey(idempotencyKey);
         ReservationState before = requireLockedState(meetupId, memberId);
         if (before.ownerId() == memberId || "CONFIRMED".equals(before.reservationStatus())) {
             return view(before, memberId);
         }
         ensureOpen(before);
+        var selected = preferences.resolve(meetupId, memberId, positions);
 
         if (!port.claimSeat(meetupId)) {
             ensureOpen(requireState(meetupId, memberId));
@@ -56,6 +67,7 @@ public class ReservationService implements ReservationUseCase {
                 "The meetup has no remaining capacity.");
         }
         port.confirmReservation(before.sessionId(), memberId);
+        port.savePositions(before.sessionId(), memberId, selected);
         port.closeIfFull(meetupId);
         return view(requireState(meetupId, memberId), memberId);
     }

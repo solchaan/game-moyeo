@@ -3,7 +3,7 @@ import { Children, cloneElement, createContext, isValidElement, useContext, useE
 import type { FormHTMLAttributes, LabelHTMLAttributes, ReactElement, HTMLAttributes } from 'react'
 import type { Problem } from './types'
 
-const fieldNames: Record<string, string> = {gameId:'게임',title:'모임 제목',description:'설명',startsAt:'시작 시간',endsAt:'종료 시간',recruitmentDeadline:'모집 마감 시간',capacity:'정원',modeOptionId:'게임 모드',platformOptionId:'플랫폼',regionOptionId:'지역',minimumTierOptionId:'최소 티어',maximumTierOptionId:'최대 티어',playStyle:'플레이 스타일',voiceChatPolicy:'음성 채팅',approvalType:'참여 방식',roleRequirements:'역할별 인원',username:'아이디',password:'비밀번호',nickname:'닉네임',email:'이메일',name:'게임 이름',slug:'URL 식별자',imageUrl:'대표 이미지',displayName:'표시 이름',code:'관리 코드',sortOrder:'순서',type:'조건 종류'}
+const fieldNames: Record<string, string> = {gameId:'게임',title:'모임 제목',description:'설명',startsAt:'시작 시간',recruitmentDeadline:'모집 마감 시간',capacity:'정원',mapOptionId:'맵',modeOptionId:'게임 모드',platformOptionId:'플랫폼',regionOptionId:'지역',minimumTierOptionId:'최소 티어',maximumTierOptionId:'최대 티어',playStyle:'플레이 스타일',voiceChatPolicy:'음성 채팅',approvalType:'참여 방식',roleRequirements:'역할별 인원',username:'아이디',password:'비밀번호',nickname:'닉네임',email:'이메일',name:'게임 이름',slug:'URL 식별자',imageUrl:'대표 이미지',displayName:'표시 이름',code:'관리 코드',sortOrder:'순서',type:'조건 종류'}
 export function fieldLabel(field: string) {
   const option = /^options\[(\d+)\]\.(.+)$/.exec(field)
   return option ? `${Number(option[1])+1}번째 조건 · ${fieldNames[option[2]] ?? t("입력값")}` : t(fieldNames[field] ?? "입력 항목")

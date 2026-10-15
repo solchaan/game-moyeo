@@ -2,10 +2,9 @@ import { expect, test } from '@playwright/test'
 import type { Page } from '@playwright/test'
 
 const game={id:1,slug:'test-game',name:'테스트 게임',description:null,imageUrl:null,active:true}
-const token=(roles=['MEMBER'])=>`e30.${Buffer.from(JSON.stringify({sub:'7',exp:Math.floor(Date.now()/1000)+3600,roles})).toString('base64url')}.test`
+const token=(roles=['MEMBER'],now=Date.now())=>`e30.${Buffer.from(JSON.stringify({sub:'7',exp:Math.floor(now/1000)+3600,roles})).toString('base64url')}.test`
 const startsAt='2099-10-01T18:00'
-const endsAt='2099-10-01T20:00'
-const meetup={id:9,gameId:1,ownerId:7,title:'함께 게임해요',description:'입력 유지 확인',playStyle:'CASUAL',voiceChatPolicy:'OPTIONAL',approvalType:'FIRST_COME',startsAt:'2099-10-01T09:00:00Z',endsAt:'2099-10-01T11:00:00Z',capacity:5,reservedCount:1,status:'OPEN',roleRequirements:{}}
+const meetup={id:9,gameId:1,ownerId:7,title:'함께 게임해요',description:'입력 유지 확인',playStyle:'CASUAL',voiceChatPolicy:'OPTIONAL',approvalType:'FIRST_COME',startsAt:'2099-10-01T09:00:00Z',capacity:5,reservedCount:1,status:'OPEN',roleRequirements:{}}
 
 test.beforeEach(async({page})=>{
   await page.route('**/api/v1/games',route=>route.fulfill({json:[game]}))
@@ -13,7 +12,7 @@ test.beforeEach(async({page})=>{
   await page.route('**/api/v1/meetups?*',route=>route.fulfill({json:{items:[],hasNext:false,nextCursor:null}}))
 })
 async function login(page:Page,roles?:string[]) {
-  await page.route('**/api/v1/auth/login',route=>route.fulfill({json:{accessToken:token(roles)}}))
+  await page.route('**/api/v1/auth/login',async route=>route.fulfill({json:{accessToken:token(roles,await page.evaluate(()=>Date.now()))}}))
   await page.goto('/meetups/new?gameId=1')
   await page.getByLabel('아이디',{exact:true}).fill('testuser')
   await page.getByLabel('비밀번호',{exact:true}).fill('password123')
@@ -24,8 +23,34 @@ async function fillMeetup(page:Page) {
   await page.getByLabel('모임 제목').fill(meetup.title)
   await page.getByLabel('상세 설명').fill(meetup.description)
   await page.getByLabel('시작 시간').fill(startsAt)
-  await page.getByLabel('종료 시간').fill(endsAt)
 }
+
+test('defaults the start across midnight and creates without an end time',async({page})=>{
+  await page.clock.setFixedTime(new Date('2026-01-01T14:50:00Z'))
+  let submitted: Record<string,unknown> | undefined
+  await page.route('**/api/v1/meetups',route=>{
+    submitted=route.request().postDataJSON()
+    return route.fulfill({status:201,json:meetup})
+  })
+  await page.route('**/api/v1/meetups/9',route=>route.fulfill({json:meetup}))
+  await page.route('**/api/v1/meetups/9/participation',route=>route.fulfill({json:{participantCount:1,capacity:5,recruitmentStatus:'OPEN',participationStatus:'OWNER'}}))
+  await login(page)
+  const expectedStart=await page.evaluate(()=>{
+    const date=new Date('2026-01-01T15:05:00Z')
+    date.setMinutes(date.getMinutes()-date.getTimezoneOffset())
+    return date.toISOString().slice(0,16)
+  })
+  await expect(page.getByLabel('시작 시간')).toHaveValue(expectedStart)
+  await expect(page.getByLabel('종료 시간')).toHaveCount(0)
+  await page.getByLabel('모임 제목').fill(meetup.title)
+  await page.getByRole('button',{name:'모임 만들기 →'}).click()
+  await expect(page).toHaveURL(/\/meetups\/9$/)
+  expect(submitted?.startsAt).toBe('2026-01-01T15:05:00.000Z')
+  expect(submitted).not.toHaveProperty('endsAt')
+  await page.getByRole('link',{name:'모임 수정',exact:true}).click()
+  await expect(page.getByLabel('시작 시간')).not.toHaveValue(expectedStart)
+  await expect(page.getByLabel('종료 시간')).toHaveCount(0)
+})
 
 test('shows server field errors, focuses input, preserves values and succeeds on retry',async({page})=>{
   let attempts=0
@@ -61,6 +86,7 @@ test('empty form identifies required fields without sending request',async({page
   let attempts=0
   await page.route('**/api/v1/meetups',route=>{attempts++;return route.abort()})
   await login(page)
+  await page.getByLabel('시작 시간').fill('')
   await page.getByRole('button',{name:'모임 만들기 →'}).click()
   await expect(page.locator('[name="title"]')).toBeFocused()
   await expect(page.locator('[name="startsAt"]')).toHaveAttribute('aria-invalid','true')

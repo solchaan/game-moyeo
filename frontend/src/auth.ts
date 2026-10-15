@@ -3,7 +3,7 @@ let expirationTimer: ReturnType<typeof setTimeout> | null = null
 
 export type AuthEndReason = 'expired' | null
 
-type TokenPayload = { exp?:number; roles?:unknown }
+type TokenPayload = { sub?:string; exp?:number; roles?:unknown }
 
 function tokenPayload(token: string):TokenPayload|null {
   try {
@@ -20,6 +20,8 @@ function tokenExpiration(token: string) {
   const expiration = tokenPayload(token)?.exp
   return typeof expiration === 'number' ? expiration * 1000 : null
 }
+
+export function getMemberId() { return accessToken ? tokenPayload(accessToken)?.sub ?? null : null }
 
 export function getAccessToken() {
   return accessToken

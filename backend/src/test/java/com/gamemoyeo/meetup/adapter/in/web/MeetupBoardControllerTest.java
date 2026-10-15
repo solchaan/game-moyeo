@@ -69,12 +69,12 @@ class MeetupBoardControllerTest {
     @Test
     void businessValidationIncludesItsField() throws Exception {
         when(useCase.create(eq(7L), any())).thenThrow(new ApiException(HttpStatus.BAD_REQUEST,
-            "INVALID_MEETUP_OPTION", "Meetup time range is invalid.",
-            Map.of("endsAt", "종료 시간은 시작 시간보다 뒤로 설정해 주세요.")));
+            "INVALID_MEETUP_OPTION", "Meetup must start more than 10 minutes from now.",
+            Map.of("startsAt", "시작 시간은 현재보다 10분 넘게 뒤로 설정해 주세요.")));
         mvc.perform(post("/api/v1/meetups").contentType(MediaType.APPLICATION_JSON)
                 .content(payload(Instant.now().plusSeconds(3600).toString())))
             .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.fieldErrors[0].field").value("endsAt"));
+            .andExpect(jsonPath("$.fieldErrors[0].field").value("startsAt"));
     }
 
     @Test
@@ -82,12 +82,16 @@ class MeetupBoardControllerTest {
         Instant start = Instant.now().plusSeconds(3600);
         when(useCase.create(eq(7L), any())).thenReturn(new MeetupBoardUseCase.MeetupView(
             99L, 1L, 7L, "Test", null, null, null, null, null, null,
-            "CASUAL", "OPTIONAL", "FIRST_COME", null, start, start.plusSeconds(3600),
-            5, 1, "OPEN", Map.of()));
+            "CASUAL", "OPTIONAL", "FIRST_COME", null, start,
+            5, 1, "OPEN", Map.of(), 40L));
         mvc.perform(post("/api/v1/meetups").contentType(MediaType.APPLICATION_JSON)
                 .content(payload(start.toString())))
             .andExpect(status().isCreated())
-            .andExpect(jsonPath("$.id").value(99));
+            .andExpect(jsonPath("$.id").value(99))
+            .andExpect(jsonPath("$.mapOptionId").value(40))
+            .andExpect(jsonPath("$.endsAt").doesNotExist());
+        org.mockito.Mockito.verify(useCase).create(eq(7L), org.mockito.ArgumentMatchers.argThat(command -> Long.valueOf(40L).equals(command.mapOptionId())));
+
     }
 
     @Test
@@ -110,8 +114,8 @@ class MeetupBoardControllerTest {
     private String payload(String startsAt) {
         return """
             {"gameId":1,"title":"Test","playStyle":"CASUAL","voiceChatPolicy":"OPTIONAL",
-             "approvalType":"FIRST_COME","startsAt":"%s","endsAt":"%s","capacity":5,
-             "roleRequirements":[]}
-            """.formatted(startsAt, Instant.now().plusSeconds(7200));
+             "approvalType":"FIRST_COME","startsAt":"%s","capacity":5,
+             "roleRequirements":[],"mapOptionId":40}
+            """.formatted(startsAt);
     }
 }
