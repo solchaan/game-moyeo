@@ -28,10 +28,48 @@ function RequireAuth({children}:{children:ReactNode}){
   return authenticated?<>{children}</>:<Navigate to="/login" replace/>
 }
 
+function HeaderNavigation({loggedIn, admin}:{loggedIn:boolean; admin:boolean}) {
+  const [open, setOpen] = useState(false)
+  const container = useRef<HTMLDivElement>(null)
+  const toggle = useRef<HTMLButtonElement>(null)
+  const location = useLocation()
+  useEffect(() => { setOpen(false) }, [location])
+  useEffect(() => {
+    const viewport = window.matchMedia('(max-width: 800px)')
+    const close = () => setOpen(false)
+    viewport.addEventListener('change', close)
+    return () => viewport.removeEventListener('change', close)
+  }, [])
+  useEffect(() => {
+    if (!open) return
+    const dismiss = (event: PointerEvent) => {
+      if (!container.current?.contains(event.target as Node)) setOpen(false)
+    }
+    document.addEventListener('pointerdown', dismiss)
+    return () => document.removeEventListener('pointerdown', dismiss)
+  }, [open])
+  return <div className="header-navigation" ref={container}
+    onBlur={event => { if (!event.currentTarget.contains(event.relatedTarget)) setOpen(false) }}
+    onKeyDown={event => { if (event.key === 'Escape' && open) { event.preventDefault(); setOpen(false); toggle.current?.focus() } }}>
+    <button className="navigation-toggle" ref={toggle} type="button" aria-label={t(open ? '메뉴 닫기' : '메뉴 열기')} aria-expanded={open} aria-controls="main-navigation" onClick={() => setOpen(value => !value)}>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true"><path d={open ? 'M6 6l12 12M6 18L18 6' : 'M4 6h16M4 12h16M4 18h16'}/></svg>
+      <span>{t('메뉴')}</span>
+    </button>
+    <nav id="main-navigation" className="header-menu" aria-label={t('주 메뉴')} data-open={open}>
+      <Link to="/" onClick={() => setOpen(false)}>{t('롤 파티 찾기')}</Link>
+      <Link to="/meetups/new" onClick={() => setOpen(false)}>{t('모임 만들기')}</Link>
+      {admin && <Link className="admin-link" to="/admin">{t('관리자')}</Link>}
+      {loggedIn && <Link to="/account">{t('게임 계정')}</Link>}
+      {loggedIn ? <button className="ghost" onClick={() => { setAccessToken(null); setOpen(false); toggle.current?.focus() }}>{t('로그아웃')}</button> : <Link className="login" to="/login">{t('로그인')}</Link>}
+      <label className="menu-language"><span>{t('언어')}</span><LanguagePicker/></label>
+    </nav>
+  </div>
+}
+
 function Layout(){
   const [loggedIn,setLoggedIn]=useState(isAuthenticated()); const [admin,setAdmin]=useState(isAdmin()); const location=useLocation()
   useEffect(()=>{const sync=()=>{setLoggedIn(isAuthenticated());setAdmin(isAdmin())};sync();window.addEventListener('gamemoyeo:auth',sync);return()=>window.removeEventListener('gamemoyeo:auth',sync)},[location])
-  return <><header><Link className="brand" to="/"><span className="brand-mark"><img src="/assets/brand/game-moyeo-icon.png" alt=""/></span><span>{t("게임모여")}<small>LEAGUE OF LEGENDS · PARTY</small></span></Link><LanguagePicker/><nav><Link to="/">{t("롤 파티 찾기")}</Link><Link to="/meetups/new">{t("모임 만들기")}</Link>{admin&&<Link className="admin-link" to="/admin"><span aria-hidden="true">⌁</span> {t("관리자")}</Link>}{loggedIn&&<Link to="/account">{t("게임 계정")}</Link>}{loggedIn?<button className="ghost" onClick={()=>setAccessToken(null)}>{t("로그아웃")}</button>:<Link className="login" to="/login">{t("로그인")}</Link>}</nav></header><main className={location.pathname.startsWith('/meetups/')?'meetup-page':undefined}><Routes><Route path="/" element={<Home/>}/><Route path="/login" element={<MemberLoginPage/>}/><Route path="/meetups/new" element={<RequireAuth><MeetupForm/></RequireAuth>}/><Route path="/meetups/:id" element={<MeetupDetail/>}/><Route path="/meetups/:id/edit" element={<RequireAuth><MeetupForm/></RequireAuth>}/><Route path="/account" element={<RequireAuth><RiotAccountPage/></RequireAuth>}/><Route path="/riot/callback" element={<RiotCallbackPage/>}/><Route path="/oauth/callback" element={<OAuthCallback/>}/><Route path="*" element={<Navigate to="/" replace/>}/></Routes></main><footer><div><span className="footer-mark">G</span><b>{t("게임모여")}</b></div><span>{t("듀오부터 다인 파티까지, 함께할 소환사를 찾는 곳")}</span></footer></>
+  return <><header><Link className="brand" to="/"><span className="brand-mark"><img src="/assets/brand/game-moyeo-icon.png" alt=""/></span><span>{t("게임모여")}<small>LEAGUE OF LEGENDS · PARTY</small></span></Link><HeaderNavigation loggedIn={loggedIn} admin={admin}/></header><main className={location.pathname.startsWith('/meetups/')?'meetup-page':undefined}><Routes><Route path="/" element={<Home/>}/><Route path="/login" element={<MemberLoginPage/>}/><Route path="/meetups/new" element={<RequireAuth><MeetupForm/></RequireAuth>}/><Route path="/meetups/:id" element={<MeetupDetail/>}/><Route path="/meetups/:id/edit" element={<RequireAuth><MeetupForm/></RequireAuth>}/><Route path="/account" element={<RequireAuth><RiotAccountPage/></RequireAuth>}/><Route path="/riot/callback" element={<RiotCallbackPage/>}/><Route path="/oauth/callback" element={<OAuthCallback/>}/><Route path="*" element={<Navigate to="/" replace/>}/></Routes></main><footer><div><span className="footer-mark">G</span><b>{t("게임모여")}</b></div><span>{t("듀오부터 다인 파티까지, 함께할 소환사를 찾는 곳")}</span></footer></>
 }
 
 function MemberLoginPage(){const navigate=useNavigate();const [alreadyLoggedIn]=useState(isAuthenticated);const [registering,setRegistering]=useState(false);const [username,setUsername]=useState('');const [password,setPassword]=useState('');const [nickname,setNickname]=useState('');const [email,setEmail]=useState('');const [error,setError]=useState('');const auth=useMutation({mutationFn:()=>registering?api.memberRegister({username:username.trim(),password,nickname:nickname.trim(),email:email.trim()||null}):api.memberLogin(username.trim(),password),onSuccess:result=>{setAccessToken(result.accessToken);const stored=sessionStorage.getItem(loginReturnKey);sessionStorage.removeItem(loginReturnKey);const returnTo=stored?.startsWith('/')&&!stored.startsWith('//')?stored:'/';navigate(isAdmin()?'/admin/games':returnTo,{replace:true})},onError:e=>{if(e instanceof ApiError)setError(e.status===401?t("아이디 또는 비밀번호가 올바르지 않습니다."):e.status===409?t("이미 사용 중인 아이디 또는 닉네임입니다."):e.status===423?t("로그인 시도가 여러 번 실패해 계정이 잠겼습니다. 15분 후 다시 시도해 주세요."):e.message);else setError(t("로그인 서버에 연결하지 못했습니다."))}});const submit=(event:FormEvent)=>{event.preventDefault();setError('');if(!username.trim()||!password||(registering&&!nickname.trim())){setError(t("필수 항목을 모두 입력해 주세요."));notifyError(t("필수 항목을 모두 입력해 주세요."));return}auth.mutate()};return alreadyLoggedIn?<Navigate to="/" replace/>:<section className="member-auth-page"><div className="member-auth-shell"><div className="member-auth-copy"><Link className="back" to="/">{t("← 홈으로 돌아가기")}</Link><p className="lobby-kicker">FIND YOUR PARTY</p><h1>{t("같이 할 사람을")}<br/><em>{t("지금 만나보세요.")}</em></h1><p>{t("로그인하면 모임을 만들고 원하는 파티에 참여할 수 있어요.")}</p></div><div className="member-auth-card"><p className="lobby-kicker">{registering?'JOIN US':'WELCOME BACK'}</p><h2>{registering?t("회원가입"):t("로그인")}</h2><p>{registering?t("게임모여에서 사용할 계정을 만들어 주세요."):t("로그인하고 나와 맞는 파티를 찾아보세요.")}</p><FeedbackForm error={auth.error} onSubmit={submit} noValidate><Field name="username">{t("아이디")}<input required autoFocus autoComplete="username" minLength={registering?4:undefined} maxLength={40} pattern={registering?"[A-Za-z0-9_]+":undefined} value={username} onChange={e=>setUsername(e.target.value)} placeholder={t("영문, 숫자, 밑줄 4자 이상")}/></Field>{registering&&<><Field name="nickname">{t("닉네임")}<input required autoComplete="nickname" minLength={2} maxLength={40} value={nickname} onChange={e=>setNickname(e.target.value)} placeholder={t("게임모여에서 표시할 이름")}/></Field><Field name="email">{t("이메일")}<small className="optional">{t("선택")}</small><input type="email" autoComplete="email" maxLength={254} value={email} onChange={e=>setEmail(e.target.value)} placeholder="name@example.com"/></Field></>}<Field name="password">{t("비밀번호")}<input required type="password" autoComplete={registering?'new-password':'current-password'} minLength={registering?8:undefined} maxLength={72} value={password} onChange={e=>setPassword(e.target.value)} placeholder={t("영문과 숫자를 포함해 8자 이상")}/></Field>{error&&<div className="admin-login-error" role="alert"><b>{registering?t("가입할 수 없습니다."):t("로그인할 수 없습니다.")}</b><span>{error}</span></div>}<button className="primary wide" disabled={auth.isPending}>{auth.isPending?t("처리 중..."):registering?t("가입하고 시작하기 →"):t("로그인 →")}</button></FeedbackForm><button className="auth-switch" type="button" onClick={()=>{setRegistering(value=>!value);setError('')}}>{registering?t("이미 계정이 있나요? 로그인"):t("아직 계정이 없나요? 회원가입")}</button></div></div></section>}

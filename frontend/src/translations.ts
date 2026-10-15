@@ -1,4 +1,8 @@
 export const english: Record<string, string> = {
+  "메뉴": "Menu",
+  "메뉴 열기": "Open menu",
+  "메뉴 닫기": "Close menu",
+  "주 메뉴": "Main navigation",
   "롤 닉네임": "League nickname",
   "예: 소환사#KR1": "e.g. Summoner#KR1",
   "직접 입력한 닉네임이 모임의 포지션 아래에 표시됩니다.": "Your manually entered nickname appears under your position in parties.",
