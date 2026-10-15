@@ -9,7 +9,6 @@ export const english: Record<string, string> = {
   "포지션 현황을 불러오지 못했습니다.": "Could not load position availability.",
   "주 포지션 기준이며, 부 포지션은 중복 집계하지 않습니다.": "Counts use primary positions. Secondary positions are not counted twice.",
   "방장": "Host",
-  "방장 포함": "Includes host",
   "모집 인원 충족": "Target reached",
   "모집 마감": "Recruitment closed",
   "비어 있음": "Vacant",

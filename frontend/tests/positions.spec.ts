@@ -43,7 +43,7 @@ test('shows host, vacancies and refreshed position counts after joining',async({
   })
   await login(page,'/meetups/41')
   const roster=page.getByRole('region',{name:'포지션 현황'})
-  await expect(roster.getByText('방장 포함')).toBeVisible()
+  await expect(roster.getByText('방장 포함')).toHaveCount(0)
   await expect(roster.getByText('비어 있음')).toHaveCount(2)
   const support=roster.getByRole('listitem').filter({has:page.getByRole('heading',{name:'서포터',exact:true})})
   await expect(support.getByText('남은 모집 인원 1명')).toBeVisible()
