@@ -1,4 +1,5 @@
 export const english: Record<string, string> = {
+  "모임 작성 항목": "Party form sections",
   "선호 포지션": "Preferred positions",
   "주 포지션": "Primary position",
   "부 포지션": "Secondary position",
