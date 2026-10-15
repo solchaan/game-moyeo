@@ -15,7 +15,9 @@
 .has-participants .position-icon-mark { border-color: var(--lobby-accent); background: var(--lobby-accent); color: var(--lobby-ink); }
 .position-occupancy { display: block; color: var(--lobby-muted); font-size: 12px; font-weight: 700; }
 .has-participants .position-occupancy { color: var(--lobby-ink); }
-.position-slot-heading { min-height: 48px; }
+.position-slot-heading { min-height: 24px; }
+.position-nicknames { margin: 0 0 12px; padding: 0; list-style: none; font-size: 12px; font-weight: 600; color: var(--lobby-ink); overflow-wrap: anywhere; }
+.position-nicknames li + li { margin-top: 6px; }
 .meetup-page .position-slot-heading h3 { margin: 0 0 6px; padding: 0; border: 0; font-size: 13px; }
 .position-slot-count { margin: 12px 0; font-size: 11px; color: var(--lobby-muted); }
 .position-slot-count strong { font-size: 22px; color: var(--lobby-ink); }

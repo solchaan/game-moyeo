@@ -5,7 +5,9 @@ import java.util.Optional;
 
 public interface ReservationPort {
 
-    record PositionContext(long gameId, Long mapOptionId) { }
+    record PositionContext(long gameId, Long mapOptionId, Long modeOptionId) {
+        public PositionContext(long gameId, Long mapOptionId) { this(gameId, mapOptionId, null); }
+    }
     PositionContext positionContext(long meetupId);
     void savePositions(long sessionId, long memberId, com.gamemoyeo.member.domain.PositionPreferences positions);
 

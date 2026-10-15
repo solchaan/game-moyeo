@@ -12,6 +12,10 @@
 .account-intro nav span { color: var(--lobby-muted); font-size: 10px; }
 .account-intro nav a:hover { color: var(--lobby-focus); }
 .account-panels { min-width: 0; }
+.riot-account-card .nickname-form { margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--lobby-line); }
+.nickname-form label { display: block; margin-bottom: 10px; font-size: 13px; font-weight: 700; }
+.riot-account-card .nickname-form input { width: 100%; min-height: 46px; border: 1px solid var(--lobby-line); border-radius: 6px; background: #fff; color: var(--lobby-ink); }
+.nickname-form p { color: var(--lobby-muted); font-size: 12px; line-height: 1.8; }
 .riot-account-card { margin: 0 0 24px; padding: 32px; border: 1px solid var(--lobby-line); border-top: 2px solid var(--lobby-ink); border-radius: 0 0 8px 8px; background: #fff; scroll-margin-top: 100px; }
 .riot-account-card h2 { margin: 0 0 16px; font-size: 20px; letter-spacing: -.03em; }
 .riot-account-card form { padding: 0; border: 0; border-radius: 0; box-shadow: none; }

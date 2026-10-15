@@ -16,7 +16,8 @@ async function request<T>(path:string, init:RequestInit = {}):Promise<T> {
   return response.json()
 }
 export const api = {
-  gameProfile:(gameId:number)=>request<PositionPreferences>(`/api/v1/members/me/games/${gameId}/profile`),
+  gameProfile:(gameId:number)=>request<import('./types').GameProfile>(`/api/v1/members/me/games/${gameId}/profile`),
+  saveGameNickname:(gameId:number,nickname:string)=>request<{nickname:string|null}>(`/api/v1/members/me/games/${gameId}/profile/nickname`,{method:'PUT',body:JSON.stringify({nickname})}),
   saveGameProfile:(gameId:number,body:PositionPreferences)=>request<PositionPreferences>(`/api/v1/members/me/games/${gameId}/profile`,{method:'PUT',body:JSON.stringify(body)}),
   positionAvailability:(id:number)=>request<PositionAvailability>(`/api/v1/meetups/${id}/positions`),
   participationPreferences:(id:number)=>request<{enabled:boolean;positions:PositionPreferences}>(`/api/v1/meetups/${id}/participation/preferences`),

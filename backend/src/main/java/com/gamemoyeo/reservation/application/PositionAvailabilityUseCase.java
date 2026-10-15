@@ -10,5 +10,5 @@ public interface PositionAvailabilityUseCase {
         int unassignedCount, int anyPositionCount, PositionSelection ownerPositions, List<PositionSlot> positions) { }
 
     record PositionSlot(String position, int participantCount, Integer capacity, Integer remainingCapacity,
-        String status, boolean includesOwner) { }
+        String status, boolean includesOwner, List<String> nicknames) { }
 }

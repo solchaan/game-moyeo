@@ -29,8 +29,19 @@ public class GameProfileController {
         }
     }
     @GetMapping
-    public PositionSelection find(@AuthenticationPrincipal Jwt jwt, @PathVariable long gameId) {
-        return PositionSelection.from(profiles.find(memberId(jwt), gameId));
+    public ProfileView find(@AuthenticationPrincipal Jwt jwt, @PathVariable long gameId) {
+        long id = memberId(jwt);
+        var positions = profiles.find(id, gameId);
+        return new ProfileView(positions.primaryPosition(), positions.secondaryPosition(),
+            profiles.nicknames(gameId, java.util.List.of(id)).get(id));
+    }
+    public record ProfileView(com.gamemoyeo.member.domain.PositionPreferences.Position primaryPosition,
+        com.gamemoyeo.member.domain.PositionPreferences.Position secondaryPosition, String nickname) { }
+    public record NicknameInput(String nickname) { }
+    @PutMapping("/nickname")
+    public NicknameInput saveNickname(@AuthenticationPrincipal Jwt jwt, @PathVariable long gameId,
+        @RequestBody NicknameInput input) {
+        return new NicknameInput(profiles.saveNickname(memberId(jwt), gameId, input.nickname()));
     }
     @PutMapping
     public PositionSelection save(@AuthenticationPrincipal Jwt jwt, @PathVariable long gameId,

@@ -4,7 +4,7 @@ const game={id:1,slug:'league-of-legends',name:'리그 오브 레전드',active:
 const party={id:41,gameId:1,ownerId:1,title:'포지션 테스트 모임',startsAt:'2099-10-01T12:00:00Z',capacity:5,reservedCount:1,status:'OPEN',roleRequirements:{},mapOptionId:2}
 const state={meetupId:41,participantCount:1,capacity:5,remainingCapacity:4,recruitmentStatus:'OPEN',participationStatus:'NOT_JOINED',canParticipate:true,canCancel:false,canClose:false,availableActions:['PARTICIPATE']}
 const availability={enabled:true,requirementsConfigured:true,remainingCapacity:4,unassignedCount:0,anyPositionCount:0,ownerPositions:{primaryPosition:'MID',secondaryPosition:'SUPPORT'},positions:[
-  {position:'MID',participantCount:1,capacity:1,remainingCapacity:0,status:'FILLED',includesOwner:true},
+  {position:'MID',participantCount:1,capacity:1,remainingCapacity:0,status:'FILLED',includesOwner:true,nicknames:['미드유저#KR1']},
   {position:'SUPPORT',participantCount:0,capacity:1,remainingCapacity:1,status:'OPEN',includesOwner:false},
   {position:'TOP',participantCount:0,capacity:null,remainingCapacity:null,status:'EMPTY',includesOwner:false},
 ]}
@@ -44,6 +44,7 @@ test('shows host, vacancies and refreshed position counts after joining',async({
   await login(page,'/meetups/41')
   const roster=page.getByRole('region',{name:'포지션 현황'})
   await expect(roster.getByText('방장 포함')).toHaveCount(0)
+  await expect(roster.getByText('미드유저#KR1',{exact:true})).toBeVisible()
   await expect(roster.getByText('비어 있음')).toHaveCount(2)
   const support=roster.getByRole('listitem').filter({has:page.getByRole('heading',{name:'서포터',exact:true})})
   await expect(support.getByText('남은 모집 인원 1명')).toBeVisible()
@@ -54,6 +55,19 @@ test('shows host, vacancies and refreshed position counts after joining',async({
   await expect(support.getByText('남은 모집 인원 0명')).toBeVisible()
   await expect(support.getByText('참여 중',{exact:true})).toBeVisible()
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true)
+})
+test('saves a manual nickname without changing positions',async({page})=>{
+  let saved:unknown
+  await page.route('**/api/v1/members/me/games/1/profile/nickname',r=>{
+    saved=r.request().postDataJSON()
+    return r.fulfill({json:saved})
+  })
+  await login(page,'/account')
+  await page.getByLabel('롤 닉네임',{exact:true}).fill('새닉네임#KR1')
+  await page.getByRole('button',{name:'닉네임 저장',exact:true}).click()
+  await expect(page.getByText('닉네임을 저장했습니다.',{exact:true})).toBeVisible()
+  expect(saved).toEqual({nickname:'새닉네임#KR1'})
+  await expect(page.getByLabel('주 포지션',{exact:true})).toHaveValue('MID')
 })
 test('saves profile and prevents duplicate positions',async({page})=>{
   let saved:unknown

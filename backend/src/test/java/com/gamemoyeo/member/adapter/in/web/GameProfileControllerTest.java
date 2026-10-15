@@ -36,6 +36,8 @@ class GameProfileControllerTest {
         mvc.perform(get("/api/v1/members/me/games/1/profile")).andExpect(status().isUnauthorized());
         mvc.perform(put("/api/v1/members/me/games/1/profile").contentType("application/json")
             .content("{\"primaryPosition\":\"MID\"}" )).andExpect(status().isUnauthorized());
+        mvc.perform(put("/api/v1/members/me/games/1/profile/nickname").contentType("application/json")
+            .content("{\"nickname\":\"user#KR1\"}")).andExpect(status().isUnauthorized());
         verifyNoInteractions(service);
     }
     @Test
@@ -49,6 +51,15 @@ class GameProfileControllerTest {
                 """))
             .andExpect(status().isOk()).andExpect(jsonPath("$.primaryPosition").value("MID"));
         verify(service).save(7, 1, positions);
+    }
+    @Test
+    void savesNicknameForAuthenticatedMember() throws Exception {
+        login();
+        when(service.saveNickname(7, 1, "user#KR1")).thenReturn("user#KR1");
+        mvc.perform(put("/api/v1/members/me/games/1/profile/nickname").contentType("application/json")
+            .content("{\"memberId\":99,\"nickname\":\"user#KR1\"}"))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.nickname").value("user#KR1"));
+        verify(service).saveNickname(7, 1, "user#KR1");
     }
     @Test
     void rejectsDuplicateUnknownAndSecondaryOnlyPositions() throws Exception {

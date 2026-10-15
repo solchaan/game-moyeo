@@ -1,4 +1,11 @@
 export const english: Record<string, string> = {
+  "롤 닉네임": "League nickname",
+  "예: 소환사#KR1": "e.g. Summoner#KR1",
+  "직접 입력한 닉네임이 모임의 포지션 아래에 표시됩니다.": "Your manually entered nickname appears under your position in parties.",
+  "닉네임 저장": "Save nickname",
+  "닉네임을 저장했습니다.": "Nickname saved.",
+  "닉네임 미설정": "Nickname not set",
+  "포지션을 사용하는 게임 모드의 참여 신청에 기본값으로 사용됩니다.": "Used as your default when joining game modes with positions.",
   "방장도 정원과 포지션별 인원에 포함됩니다.": "The host counts toward the party and position totals.",
   "방장 주 포지션": "Host primary position",
   "모임을 만들 때 프로필의 포지션이 자동으로 저장됩니다.": "Your profile positions are saved automatically when you create the party.",

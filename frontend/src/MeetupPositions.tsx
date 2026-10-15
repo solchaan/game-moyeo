@@ -25,6 +25,7 @@ export default function MeetupPositions({meetupId, revision}:{meetupId:number;re
     <ul className="position-roster">{data.positions.map(slot=><li key={slot.position} className={`position-slot is-${slot.status.toLowerCase()} ${slot.participantCount>0?'has-participants':'is-vacant'}`}>
       <div className="position-icon"><PositionIcon position={slot.position}/><span className="position-icon-mark" aria-hidden="true">{slot.participantCount>0?'✓':'−'}</span></div>
       <div className="position-slot-heading"><h3>{t(positions[slot.position])}</h3></div>
+      {slot.nicknames?.length>0&&<ul className="position-nicknames">{slot.nicknames.map((nickname,index)=><li key={index}>{nickname||t('닉네임 미설정')}</li>)}</ul>}
       <span className="position-occupancy">{t(slot.participantCount>0?'참여 중':'비어 있음')}</span>
       <p className="position-slot-count"><strong>{slot.participantCount}</strong>{slot.capacity!==null?` / ${slot.capacity}`:''}{t('명')}</p>
       {slot.status!=='EMPTY'&&slot.status!=='OCCUPIED'&&<span className="position-slot-status">{t(statuses[slot.status])}</span>}

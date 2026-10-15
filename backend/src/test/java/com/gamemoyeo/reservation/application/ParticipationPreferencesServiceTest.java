@@ -49,4 +49,21 @@ class ParticipationPreferencesServiceTest {
             .isInstanceOf(ApiException.class);
         verifyNoInteractions(profiles);
     }
+
+    @Test
+    void modeControlsPositionsWithoutMapAndOverridesLegacyMap() {
+        var profile = new PositionPreferences(Position.TOP, null);
+        when(profiles.find(7, 1)).thenReturn(profile);
+        for (String code : List.of("RANKED_FLEX", "NORMAL_DRAFT", "NEW_MODE", "ARAM", "ARAM_MEYHEM", "ARAM_MAYHEM")) {
+            when(port.positionContext(10)).thenReturn(new ReservationPort.PositionContext(1, null, 3L));
+            when(games.findGame(1)).thenReturn(new GameCatalogUseCase.GameDetailView(
+                new GameCatalogUseCase.GameView(1, "league-of-legends", "League", null, null, true),
+                List.of(new GameCatalogUseCase.OptionView(3, 1, GameCatalogUseCase.OptionType.MODE, code, code, 1, true, null))));
+            boolean allowed = !code.startsWith("ARAM");
+            assertThat(service.defaults(10, 7).enabled()).isEqualTo(allowed);
+            assertThat(service.resolve(10, 7, null)).isEqualTo(allowed ? profile : PositionPreferences.empty());
+            when(port.positionContext(10)).thenReturn(new ReservationPort.PositionContext(1, 99L, 3L));
+            assertThat(service.defaults(10, 7).enabled()).isEqualTo(allowed);
+        }
+    }
 }

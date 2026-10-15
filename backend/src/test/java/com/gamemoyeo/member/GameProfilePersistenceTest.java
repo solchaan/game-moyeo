@@ -33,22 +33,27 @@ class GameProfilePersistenceTest {
     void persistsDefaultsOverridesAndCancellationWithoutChangingProfile() {
         jdbc.update("INSERT INTO member (id, nickname) VALUES (1, 'owner'), (2, 'participant'), (3, 'other')");
         jdbc.update("INSERT INTO game (id, slug, name) VALUES (1, 'league-of-legends', 'League')");
-        jdbc.update("INSERT INTO game_option (id, game_id, option_type, code, display_name) VALUES (1, 1, 'MAP', 'SUMMONERS_RIFT', 'Rift')");
+        jdbc.update("INSERT INTO game_option (id, game_id, option_type, code, display_name) VALUES (1, 1, 'MODE', 'RANKED_FLEX', 'Flex')");
         jdbc.update("""
             INSERT INTO game_option (id, game_id, option_type, code, display_name) VALUES
             (2, 1, 'ROLE', 'TOP', 'Top'), (3, 1, 'ROLE', 'BOTTOM', 'Bottom'),
             (4, 1, 'ROLE', 'SUPPORT', 'Support'), (5, 1, 'ROLE', 'MID', 'Mid')
             """);
         profiles.save(1, 1, new PositionPreferences(Position.TOP, Position.SUPPORT));
-        var created = meetups.create(1, new MeetupBoardUseCase.MeetupCommand(1, null, null, null, null, null,
+        assertThat(profiles.saveNickname(1, 1, "  방장#KR1  ")).isEqualTo("방장#KR1");
+        assertThatThrownBy(() -> profiles.saveNickname(1, 1, "x".repeat(65)))
+            .isInstanceOf(com.gamemoyeo.common.exception.ApiException.class);
+        var created = meetups.create(1, new MeetupBoardUseCase.MeetupCommand(1, 1L, null, null, null, null,
             "Party", "", "CASUAL", "OPTIONAL", "FIRST_COME", null, Instant.now().plusSeconds(7200),
-            5, Map.of(2L, 2, 3L, 1, 4L, 1, 5L, 1), 1L));
+            5, Map.of(2L, 2, 3L, 1, 4L, 1, 5L, 1), null));
         assertThat(created.id()).isEqualTo(1);
         profiles.save(1, 1, new PositionPreferences(Position.JUNGLE, null));
         var initial = availability.find(1);
         assertThat(initial.ownerPositions().primaryPosition()).isEqualTo(Position.TOP);
         assertThat(initial.positions().get(0).includesOwner()).isTrue();
         assertThat(initial.positions().get(0).participantCount()).isEqualTo(1);
+        assertThat(initial.positions().get(0).nicknames()).containsExactly("방장#KR1");
+        assertThat(profiles.nicknames(1, java.util.List.of(1L, 2L))).containsEntry(1L, "방장#KR1").doesNotContainKey(2L);
         assertThat(initial.positions().get(0).remainingCapacity()).isEqualTo(1);
         assertThat(initial.positions().get(3).position()).isEqualTo("ADC");
         assertThat(initial.positions().get(3).capacity()).isEqualTo(1);
@@ -56,11 +61,15 @@ class GameProfilePersistenceTest {
         var profile = new PositionPreferences(Position.MID, Position.SUPPORT);
         assertThat(profiles.find(2, 1)).isEqualTo(PositionPreferences.empty());
         profiles.save(2, 1, profile);
+        profiles.saveNickname(2, 1, "미드유저#KR1");
         assertThat(profiles.find(2, 1)).isEqualTo(profile);
         assertThat(profiles.find(3, 1)).isEqualTo(PositionPreferences.empty());
         reservations.participate(1, 2, "default");
         assertThat(savedPrimary()).isEqualTo("MID");
         assertThat(availability.find(1).positions().get(2).status()).isEqualTo("FILLED");
+        assertThat(availability.find(1).positions().get(2).nicknames()).containsExactly("미드유저#KR1");
+        profiles.saveNickname(2, 1, "변경한닉네임");
+        assertThat(availability.find(1).positions().get(2).nicknames()).containsExactly("변경한닉네임");
         reservations.cancel(1, 2, "cancel");
         assertThat(availability.find(1).positions().get(2).participantCount()).isZero();
         reservations.participate(1, 2, "override", new PositionPreferences(Position.TOP, Position.JUNGLE));

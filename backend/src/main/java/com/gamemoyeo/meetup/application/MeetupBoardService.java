@@ -89,10 +89,9 @@ public class MeetupBoardService implements MeetupBoardUseCase {
         Map<Long, OptionView> options = new HashMap<>();
         game.options().forEach(option -> options.put(option.id(), option));
         require(options, command.mapOptionId(), OptionType.MAP, "mapOptionId");
-        OptionView map = options.get(command.mapOptionId());
-        if (!command.roleRequirements().isEmpty() && (map == null || !map.roleSelectionAllowed())) {
-            throw invalid("Role requirements are only allowed on Summoner's Rift.", "roleRequirements",
-                "포지션별 모집은 소환사의 협곡 맵에서만 설정할 수 있습니다.");
+        if (!command.roleRequirements().isEmpty() && !game.positionsAllowed(command.modeOptionId(), command.mapOptionId())) {
+            throw invalid("Role requirements are not allowed for this mode.", "roleRequirements",
+                "선택한 게임 모드에서는 포지션별 모집을 설정할 수 없습니다.");
         }
         require(options, command.modeOptionId(), OptionType.MODE, "modeOptionId");
         require(options, command.platformOptionId(), OptionType.PLATFORM, "platformOptionId");

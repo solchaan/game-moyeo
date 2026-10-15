@@ -18,5 +18,6 @@ public class GameProfileJpaEntity {
     @Column(name = "game_id", nullable = false) long gameId;
     @Enumerated(EnumType.STRING) @Column(name = "primary_position") Position primaryPosition;
     @Enumerated(EnumType.STRING) @Column(name = "secondary_position") Position secondaryPosition;
+    @Column(name = "manual_nickname", length = 64) String manualNickname;
     protected GameProfileJpaEntity() { }
 }

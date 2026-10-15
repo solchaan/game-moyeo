@@ -50,12 +50,20 @@ public interface GameCatalogUseCase {
         String metadata
     ) {
         @com.fasterxml.jackson.annotation.JsonProperty("roleSelectionAllowed")
-        @io.swagger.v3.oas.annotations.media.Schema(description = "Whether this active map allows position requirements.")
+        @io.swagger.v3.oas.annotations.media.Schema(description = "Whether this active mode (or legacy map) allows position requirements.")
         public boolean roleSelectionAllowed() {
-            return active && type == OptionType.MAP && "SUMMONERS_RIFT".equals(code);
+            return active && (type == OptionType.MAP && "SUMMONERS_RIFT".equals(code)
+                || type == OptionType.MODE && !java.util.Set.of("ARAM", "ARAM_MEYHEM", "ARAM_MAYHEM").contains(code));
         }
     }
 
     record GameDetailView(GameView game, List<OptionView> options) {
+        public boolean positionsAllowed(Long modeId, Long legacyMapId) {
+            if (!"league-of-legends".equals(game.slug())) {
+                return false;
+            }
+            return options.stream().anyMatch(option -> java.util.Objects.equals(option.id(), modeId != null ? modeId : legacyMapId)
+                && option.type() == (modeId != null ? OptionType.MODE : OptionType.MAP) && option.roleSelectionAllowed());
+        }
     }
 }

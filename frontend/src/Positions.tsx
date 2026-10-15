@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from './api'
 import { getMemberId } from './auth'
 import { t } from './locale'
-import type { PositionPreferences } from './types'
+import type { GameProfile as GameProfileData, PositionPreferences } from './types'
 
 export const positions = { TOP: '탑', JUNGLE: '정글', MID: '미드', ADC: '원딜', SUPPORT: '서포터', ANY: '상관없음' }
 export function PositionFields({value, onChange, disabled = false}:{value:PositionPreferences;onChange:(value:PositionPreferences)=>void;disabled?:boolean}) {
@@ -18,14 +18,29 @@ export function PositionFields({value, onChange, disabled = false}:{value:Positi
     </select>
   </fieldset>
 }
-function ProfileEditor({gameId, initial}:{gameId:number;initial:PositionPreferences}) {
-  const [value,setValue]=useState(initial)
+function NicknameEditor({gameId,initial}:{gameId:number;initial:string|null}) {
+  const [nickname,setNickname]=useState(initial??'')
+  const id=useId()
+  const qc=useQueryClient()
+  const save=useMutation({mutationFn:()=>api.saveGameNickname(gameId,nickname),onSuccess:data=>{
+    setNickname(data.nickname??'');void qc.invalidateQueries({queryKey:['game-profile']});void qc.invalidateQueries({queryKey:['position-availability']})
+  }})
+  return <form className="nickname-form" onSubmit={e=>{e.preventDefault();save.mutate()}}>
+    <label htmlFor={id}>{t('롤 닉네임')}</label>
+    <input id={id} value={nickname} maxLength={64} placeholder={t('예: 소환사#KR1')} disabled={save.isPending} aria-describedby={`${id}-help`} onChange={e=>{setNickname(e.target.value);save.reset()}}/>
+    <p id={`${id}-help`}>{t('직접 입력한 닉네임이 모임의 포지션 아래에 표시됩니다.')}</p>
+    <button className="primary" disabled={save.isPending}>{t(save.isPending?'저장 중...':'닉네임 저장')}</button>
+    {save.error&&<p role="alert">{save.error.message}</p>}{save.isSuccess&&<p role="status">{t('닉네임을 저장했습니다.')}</p>}
+  </form>
+}
+function ProfileEditor({gameId, initial}:{gameId:number;initial:GameProfileData}) {
+  const [value,setValue]=useState<PositionPreferences>({primaryPosition:initial.primaryPosition,secondaryPosition:initial.secondaryPosition})
   const qc=useQueryClient()
   const save=useMutation({mutationFn:()=>api.saveGameProfile(gameId,value),onSuccess:()=>{void qc.invalidateQueries({queryKey:['game-profile']});void qc.invalidateQueries({queryKey:['participation-preferences']})}})
-  return <form onSubmit={e=>{e.preventDefault();save.mutate()}}><PositionFields value={value} onChange={next=>{setValue(next);save.reset()}} disabled={save.isPending}/>
+  return <><NicknameEditor gameId={gameId} initial={initial.nickname}/><form onSubmit={e=>{e.preventDefault();save.mutate()}}><PositionFields value={value} onChange={next=>{setValue(next);save.reset()}} disabled={save.isPending}/>
     <button className="primary" disabled={save.isPending}>{t(save.isPending?'저장 중...':'포지션 저장')}</button>
     {save.error&&<p role="alert">{save.error.message}</p>}{save.isSuccess&&<p role="status">{t('기본 포지션을 저장했습니다.')}</p>}
-  </form>
+  </form></>
 }
 function GameProfile({gameId}:{gameId:number}) {
   const profile=useQuery({queryKey:['game-profile',gameId,getMemberId()],queryFn:()=>api.gameProfile(gameId),gcTime:0})
@@ -36,7 +51,7 @@ function GameProfile({gameId}:{gameId:number}) {
 export function LeagueProfile() {
   const games=useQuery({queryKey:['games'],queryFn:api.games})
   const league=games.data?.find(game=>game.slug==='league-of-legends')
-  return <article className="riot-account-card" id="league-profile"><p className="lobby-kicker">01 / LEAGUE OF LEGENDS</p><h2>{t('롤 프로필')}</h2><p>{t('소환사의 협곡 참여 신청에 기본값으로 사용됩니다.')}</p>
+  return <article className="riot-account-card" id="league-profile"><p className="lobby-kicker">01 / LEAGUE OF LEGENDS</p><h2>{t('롤 프로필')}</h2><p>{t('포지션을 사용하는 게임 모드의 참여 신청에 기본값으로 사용됩니다.')}</p>
     {games.isPending?<p role="status">{t('프로필을 불러오는 중...')}</p>:games.error?<div role="alert">{games.error.message}<button onClick={()=>void games.refetch()}>{t('다시 시도')}</button></div>:league?<GameProfile gameId={league.id}/>:<p>{t('롤 프로필을 아직 설정할 수 없습니다.')}</p>}
   </article>
 }

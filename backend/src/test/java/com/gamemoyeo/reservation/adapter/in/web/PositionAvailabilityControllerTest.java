@@ -22,7 +22,7 @@ class PositionAvailabilityControllerTest {
     void publiclyShowsCountsAndOwnerPositionWithoutExposingMemberIds() throws Exception {
         var service = mock(PositionAvailabilityUseCase.class);
         when(service.find(1)).thenReturn(new PositionAvailabilityView(true, true, 4, 0, 0,
-            new PositionSelection(Position.TOP, null), List.of(new PositionSlot("TOP", 1, 2, 1, "OPEN", true))));
+            new PositionSelection(Position.TOP, null), List.of(new PositionSlot("TOP", 1, 2, 1, "OPEN", true, List.of("탑유저#KR1")))));
         var mvc = MockMvcBuilders.standaloneSetup(new PositionAvailabilityController(service))
             .setControllerAdvice(new GlobalExceptionHandler()).build();
         mvc.perform(get("/api/v1/meetups/1/positions")).andExpect(status().isOk())

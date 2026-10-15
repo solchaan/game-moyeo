@@ -22,8 +22,7 @@ public class ParticipationPreferencesService {
     public PreferencesView defaults(long meetupId, long memberId) {
         var context = port.positionContext(meetupId);
         var game = games.findGame(context.gameId());
-        boolean enabled = "league-of-legends".equals(game.game().slug()) && game.options().stream()
-            .anyMatch(option -> java.util.Objects.equals(option.id(), context.mapOptionId()) && option.roleSelectionAllowed());
+        boolean enabled = game.positionsAllowed(context.modeOptionId(), context.mapOptionId());
         return new PreferencesView(enabled, PositionSelection.from(enabled ? profiles.find(memberId, context.gameId()) : PositionPreferences.empty()));
     }
     public PositionPreferences resolve(long meetupId, long memberId, PositionPreferences requested) {

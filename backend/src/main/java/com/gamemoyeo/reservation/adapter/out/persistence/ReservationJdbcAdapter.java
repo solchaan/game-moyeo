@@ -19,8 +19,8 @@ public class ReservationJdbcAdapter implements ReservationPort {
 
     @Override
     public PositionContext positionContext(long meetupId) {
-        return jdbc.query("SELECT game_id, map_option_id FROM meetup WHERE id = ? AND status <> 'DELETED'",
-            (rs, row) -> new PositionContext(rs.getLong(1), rs.getObject(2, Long.class)), meetupId)
+        return jdbc.query("SELECT game_id, map_option_id, mode_option_id FROM meetup WHERE id = ? AND status <> 'DELETED'",
+            (rs, row) -> new PositionContext(rs.getLong(1), rs.getObject(2, Long.class), rs.getObject(3, Long.class)), meetupId)
             .stream().findFirst().orElseThrow(() -> new com.gamemoyeo.common.exception.ApiException(
                 org.springframework.http.HttpStatus.NOT_FOUND, "MEETUP_NOT_FOUND", "Meetup was not found."));
     }

@@ -10,7 +10,6 @@ import com.gamemoyeo.reservation.application.port.out.PositionRosterPort;
 import com.gamemoyeo.reservation.domain.PositionVacancy;
 import java.util.EnumMap;
 import java.util.List;
-import java.util.Objects;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,13 +20,16 @@ public class PositionAvailabilityService implements PositionAvailabilityUseCase 
     private final GameCatalogUseCase games;
     private final ReservationUseCase reservations;
     private final PositionRosterPort roster;
+    private final com.gamemoyeo.member.application.port.in.GameProfileUseCase profiles;
 
     public PositionAvailabilityService(MeetupBoardUseCase meetups, GameCatalogUseCase games,
-        ReservationUseCase reservations, PositionRosterPort roster) {
+        ReservationUseCase reservations, PositionRosterPort roster,
+        com.gamemoyeo.member.application.port.in.GameProfileUseCase profiles) {
         this.meetups = meetups;
         this.games = games;
         this.reservations = reservations;
         this.roster = roster;
+        this.profiles = profiles;
     }
 
     @Override
@@ -35,8 +37,7 @@ public class PositionAvailabilityService implements PositionAvailabilityUseCase 
         var meetup = meetups.find(meetupId);
         var game = games.findGame(meetup.gameId());
         var participation = reservations.state(meetupId, null);
-        boolean enabled = "league-of-legends".equals(game.game().slug()) && game.options().stream()
-            .anyMatch(option -> Objects.equals(option.id(), meetup.mapOptionId()) && option.roleSelectionAllowed());
+        boolean enabled = game.positionsAllowed(meetup.modeOptionId(), meetup.mapOptionId());
         if (!enabled) {
             return new PositionAvailabilityView(false, false, participation.remainingCapacity(), 0, 0,
                 PositionSelection.from(PositionPreferences.empty()), List.of());
@@ -59,6 +60,7 @@ public class PositionAvailabilityService implements PositionAvailabilityUseCase 
             }
         });
         var members = roster.confirmedPositions(meetupId);
+        var nicknames = profiles.nicknames(meetup.gameId(), members.stream().map(PositionRosterPort.MemberPosition::memberId).toList());
         var owner = members.stream().filter(member -> member.memberId() == meetup.ownerId())
             .map(PositionRosterPort.MemberPosition::positions).findFirst().orElse(PositionPreferences.empty());
         var slots = List.of(Position.TOP, Position.JUNGLE, Position.MID, Position.ADC, Position.SUPPORT).stream()
@@ -67,7 +69,9 @@ public class PositionAvailabilityService implements PositionAvailabilityUseCase 
                 var vacancy = PositionVacancy.calculate(count, targets.get(position), participation.remainingCapacity(),
                     "OPEN".equals(participation.recruitmentStatus()));
                 return new PositionSlot(position.name(), count, vacancy.capacity(), vacancy.remainingCapacity(),
-                    vacancy.status(), owner.primaryPosition() == position);
+                    vacancy.status(), owner.primaryPosition() == position,
+                    members.stream().filter(member -> member.positions().primaryPosition() == position)
+                        .map(member -> nicknames.getOrDefault(member.memberId(), "")).toList());
             }).toList();
         return new PositionAvailabilityView(true, !targets.isEmpty(), participation.remainingCapacity(),
             (int) members.stream().filter(member -> member.positions().primaryPosition() == null).count(),
