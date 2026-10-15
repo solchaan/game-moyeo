@@ -7,7 +7,14 @@
 .position-owner > span { display: inline-block; margin-right: 8px; padding: 3px 8px; border-radius: 4px; background: var(--lobby-soft); color: var(--lobby-ink); }
 .position-roster { display: grid; grid-template-columns: repeat(auto-fit, minmax(115px, 1fr)); gap: 10px; padding: 0; list-style: none; }
 .position-slot { padding: 16px 12px; border: 1px solid var(--lobby-line); border-radius: 6px; }
-.position-slot.is-open, .position-slot.is-empty { background: var(--lobby-paper); border-top: 3px solid var(--lobby-accent); }
+.position-slot.is-vacant { background: var(--lobby-paper); border-top: 3px solid var(--lobby-line); }
+.position-slot.has-participants { background: var(--lobby-soft); border-top: 3px solid var(--lobby-focus); }
+.position-icon { position: relative; display: grid; place-items: center; width: 54px; height: 54px; margin-bottom: 16px; border: 1px dashed var(--lobby-line); border-radius: 12px; background: var(--lobby-soft); color: var(--lobby-muted); }
+.has-participants .position-icon { border: 1px solid var(--lobby-ink); background: var(--lobby-ink); color: var(--lobby-accent); }
+.position-icon-mark { position: absolute; right: -5px; bottom: -5px; display: grid; place-items: center; width: 20px; height: 20px; border: 1px solid var(--lobby-line); border-radius: 50%; background: var(--lobby-paper); color: var(--lobby-muted); font-size: 12px; font-weight: 700; }
+.has-participants .position-icon-mark { border-color: var(--lobby-accent); background: var(--lobby-accent); color: var(--lobby-ink); }
+.position-occupancy { display: block; color: var(--lobby-muted); font-size: 12px; font-weight: 700; }
+.has-participants .position-occupancy { color: var(--lobby-ink); }
 .position-slot-heading { min-height: 48px; }
 .meetup-page .position-slot-heading h3 { margin: 0 0 6px; padding: 0; border: 0; font-size: 13px; }
 .position-host-badge { font-size: 10px; color: var(--lobby-focus); }

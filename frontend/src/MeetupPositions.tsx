@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from './api'
 import { t } from './locale'
 import { positions } from './Positions'
+import PositionIcon from './PositionIcon'
 
 const statuses = { OPEN:'모집 중', FILLED:'모집 인원 충족', CLOSED:'모집 마감', EMPTY:'비어 있음', OCCUPIED:'참여 중' }
 
@@ -21,10 +22,12 @@ export default function MeetupPositions({meetupId, revision}:{meetupId:number;re
     <p className="position-owner"><span>{t('방장')}</span> {owner.primaryPosition?t(positions[owner.primaryPosition]):t('미설정')}
       {owner.secondaryPosition&&<> · {t('부 포지션')} {t(positions[owner.secondaryPosition])}</>}
     </p>
-    <ul className="position-roster">{data.positions.map(slot=><li key={slot.position} className={`position-slot is-${slot.status.toLowerCase()}`}>
+    <ul className="position-roster">{data.positions.map(slot=><li key={slot.position} className={`position-slot is-${slot.status.toLowerCase()} ${slot.participantCount>0?'has-participants':'is-vacant'}`}>
+      <div className="position-icon"><PositionIcon position={slot.position}/><span className="position-icon-mark" aria-hidden="true">{slot.participantCount>0?'✓':'−'}</span></div>
       <div className="position-slot-heading"><h3>{t(positions[slot.position])}</h3>{slot.includesOwner&&<span className="position-host-badge">{t('방장 포함')}</span>}</div>
+      <span className="position-occupancy">{t(slot.participantCount>0?'참여 중':'비어 있음')}</span>
       <p className="position-slot-count"><strong>{slot.participantCount}</strong>{slot.capacity!==null?` / ${slot.capacity}`:''}{t('명')}</p>
-      <span className="position-slot-status">{t(statuses[slot.status])}</span>
+      {slot.status!=='EMPTY'&&slot.status!=='OCCUPIED'&&<span className="position-slot-status">{t(statuses[slot.status])}</span>}
       {slot.remainingCapacity!==null&&<small>{t('남은 모집 인원')} {slot.remainingCapacity}{t('명')}</small>}
     </li>)}</ul>
     <div className="position-roster-notes">
