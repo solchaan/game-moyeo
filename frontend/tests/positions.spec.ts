@@ -3,6 +3,11 @@ const token=`e30.${Buffer.from(JSON.stringify({sub:'7',exp:Math.floor(Date.now()
 const game={id:1,slug:'league-of-legends',name:'리그 오브 레전드',active:true}
 const party={id:41,gameId:1,ownerId:1,title:'포지션 테스트 모임',startsAt:'2099-10-01T12:00:00Z',capacity:5,reservedCount:1,status:'OPEN',roleRequirements:{},mapOptionId:2}
 const state={meetupId:41,participantCount:1,capacity:5,remainingCapacity:4,recruitmentStatus:'OPEN',participationStatus:'NOT_JOINED',canParticipate:true,canCancel:false,canClose:false,availableActions:['PARTICIPATE']}
+const availability={enabled:true,requirementsConfigured:true,remainingCapacity:4,unassignedCount:0,anyPositionCount:0,ownerPositions:{primaryPosition:'MID',secondaryPosition:'SUPPORT'},positions:[
+  {position:'MID',participantCount:1,capacity:1,remainingCapacity:0,status:'FILLED',includesOwner:true},
+  {position:'SUPPORT',participantCount:0,capacity:1,remainingCapacity:1,status:'OPEN',includesOwner:false},
+  {position:'TOP',participantCount:0,capacity:null,remainingCapacity:null,status:'EMPTY',includesOwner:false},
+]}
 async function login(page:import('@playwright/test').Page,path:string) {
   await page.goto('/account')
   await page.getByLabel('아이디',{exact:true}).fill('testuser')
@@ -23,7 +28,30 @@ test.beforeEach(async({page})=>{
   await page.route('**/api/v1/meetups?*',r=>r.fulfill({json:{items:[party],nextCursor:null,hasNext:false}}))
   await page.route('**/api/v1/meetups/41',r=>r.fulfill({json:party}))
   await page.route('**/api/v1/meetups/41/participation',r=>r.fulfill({json:state}))
+  await page.route('**/api/v1/meetups/41/positions',r=>r.fulfill({json:availability}))
   await page.route('**/api/v1/meetups/41/participation/preferences',r=>r.fulfill({json:{enabled:true,positions:{primaryPosition:'MID',secondaryPosition:'SUPPORT'}}}))
+})
+test('shows host, vacancies and refreshed position counts after joining',async({page})=>{
+  let joined=false
+  await page.route('**/api/v1/meetups/41/positions',r=>r.fulfill({json:joined?{
+    ...availability,remainingCapacity:3,positions:availability.positions.map(slot=>slot.position==='SUPPORT'?{...slot,participantCount:1,remainingCapacity:0,status:'FILLED'}:slot),
+  }:availability}))
+  await page.route('**/api/v1/meetups/41/participation',r=>r.fulfill({json:joined?{...state,participantCount:2,canParticipate:false,canCancel:true,participationStatus:'JOINED'}:state}))
+  await page.route('**/api/v1/meetups/41/reservations',r=>{
+    joined=true
+    return r.fulfill({json:{...state,participantCount:2,canParticipate:false,canCancel:true,participationStatus:'JOINED'}})
+  })
+  await login(page,'/meetups/41')
+  const roster=page.getByRole('region',{name:'포지션 현황'})
+  await expect(roster.getByText('방장 포함')).toBeVisible()
+  await expect(roster.getByText('비어 있음')).toBeVisible()
+  const support=roster.getByRole('listitem').filter({has:page.getByRole('heading',{name:'서포터',exact:true})})
+  await expect(support.getByText('남은 모집 인원 1명')).toBeVisible()
+  await page.getByLabel('주 포지션',{exact:true}).selectOption('SUPPORT')
+  await page.getByRole('button',{name:'참여 신청하기',exact:true}).click()
+  await expect(support.getByText('모집 인원 충족')).toBeVisible()
+  await expect(support.getByText('남은 모집 인원 0명')).toBeVisible()
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true)
 })
 test('saves profile and prevents duplicate positions',async({page})=>{
   let saved:unknown

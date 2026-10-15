@@ -41,6 +41,8 @@ public class ReservationService implements ReservationUseCase {
         if (!port.initializeOwner(meetupId, ownerId)) {
             throw notFound();
         }
+        var positions = preferences.resolve(meetupId, ownerId, null);
+        port.savePositions(requireState(meetupId, ownerId).sessionId(), ownerId, positions);
     }
 
     @Override

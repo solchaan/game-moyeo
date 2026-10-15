@@ -1,4 +1,23 @@
 /* Meetup routes share the lobby's paper, ink, and accent tokens. */
+.meetup-positions { margin-top: 28px; }
+.owner-position-preview { margin: 0 0 24px; padding: 16px; border: 1px solid var(--lobby-line); border-radius: 6px; background: var(--lobby-paper); font-size: 12px; line-height: 1.8; }
+.owner-position-preview p { margin: 0 0 8px; }
+.owner-position-preview small { color: var(--lobby-muted); }
+.position-owner { font-size: 12px; line-height: 1.8; color: var(--lobby-muted); }
+.position-owner > span { display: inline-block; margin-right: 8px; padding: 3px 8px; border-radius: 4px; background: var(--lobby-soft); color: var(--lobby-ink); }
+.position-roster { display: grid; grid-template-columns: repeat(auto-fit, minmax(115px, 1fr)); gap: 10px; padding: 0; list-style: none; }
+.position-slot { padding: 16px 12px; border: 1px solid var(--lobby-line); border-radius: 6px; }
+.position-slot.is-open, .position-slot.is-empty { background: var(--lobby-paper); border-top: 3px solid var(--lobby-accent); }
+.position-slot-heading { min-height: 48px; }
+.meetup-page .position-slot-heading h3 { margin: 0 0 6px; padding: 0; border: 0; font-size: 13px; }
+.position-host-badge { font-size: 10px; color: var(--lobby-focus); }
+.position-slot-count { margin: 12px 0; font-size: 11px; color: var(--lobby-muted); }
+.position-slot-count strong { font-size: 22px; color: var(--lobby-ink); }
+.position-slot-status { display: block; font-size: 11px; font-weight: 700; }
+.position-slot small { display: block; margin-top: 8px; font-size: 10px; color: var(--lobby-muted); }
+.position-roster-notes { color: var(--lobby-muted); font-size: 12px; line-height: 1.8; }
+.position-roster-notes p { margin: 6px 0; }
+.position-load-error { margin-top: 24px; font-size: 13px; color: var(--danger); }
 .meetup-page {
   --ink: var(--lobby-ink);
   --text: var(--lobby-ink);

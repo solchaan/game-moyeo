@@ -11,6 +11,7 @@ const party = {
 }
 
 test.beforeEach(async ({ page }) => {
+  await page.route('**/api/v1/members/me/games/1/profile', route => route.fulfill({ json: { primaryPosition: null, secondaryPosition: null } }))
   await page.route('**/api/v1/games/*', route => route.fulfill({ json: { game: games[0], options: regions } }))
   await page.route('**/api/v1/games', route => route.fulfill({ json: games }))
   await page.route('**/api/v1/meetups?*', route => route.fulfill({ json: emptyPage }))

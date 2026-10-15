@@ -1,4 +1,4 @@
-import type { PositionPreferences, CreateGamePayload, CursorPage, Game, GameDetail, GameOption, GameOptionPayload, GamePayload, Meetup, MeetupPayload, Participation, Problem, TokenPair } from './types'
+import type { PositionAvailability, PositionPreferences, CreateGamePayload, CursorPage, Game, GameDetail, GameOption, GameOptionPayload, GamePayload, Meetup, MeetupPayload, Participation, Problem, TokenPair } from './types'
 import { problemMessage } from './feedback'
 import { getAccessToken, setAccessToken } from './auth'
 
@@ -18,6 +18,7 @@ async function request<T>(path:string, init:RequestInit = {}):Promise<T> {
 export const api = {
   gameProfile:(gameId:number)=>request<PositionPreferences>(`/api/v1/members/me/games/${gameId}/profile`),
   saveGameProfile:(gameId:number,body:PositionPreferences)=>request<PositionPreferences>(`/api/v1/members/me/games/${gameId}/profile`,{method:'PUT',body:JSON.stringify(body)}),
+  positionAvailability:(id:number)=>request<PositionAvailability>(`/api/v1/meetups/${id}/positions`),
   participationPreferences:(id:number)=>request<{enabled:boolean;positions:PositionPreferences}>(`/api/v1/meetups/${id}/participation/preferences`),
   riotStatus:()=>request<{enabled:boolean;linked:boolean;riotId:string|null}>('/api/v1/members/me/riot'),
   riotStart:()=>request<{authorizationUrl:string}>('/api/v1/members/me/riot/authorization',{method:'POST'}),

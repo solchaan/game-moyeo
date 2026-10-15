@@ -7,6 +7,7 @@ const startsAt='2099-10-01T18:00'
 const meetup={id:9,gameId:1,ownerId:7,title:'함께 게임해요',description:'입력 유지 확인',playStyle:'CASUAL',voiceChatPolicy:'OPTIONAL',approvalType:'FIRST_COME',startsAt:'2099-10-01T09:00:00Z',capacity:5,reservedCount:1,status:'OPEN',roleRequirements:{}}
 
 test.beforeEach(async({page})=>{
+  await page.route('**/api/v1/meetups/*/positions',route=>route.fulfill({json:{enabled:false}}))
   await page.route('**/api/v1/games',route=>route.fulfill({json:[game]}))
   await page.route('**/api/v1/games/1',route=>route.fulfill({json:{game,options:[]}}))
   await page.route('**/api/v1/meetups?*',route=>route.fulfill({json:{items:[],hasNext:false,nextCursor:null}}))

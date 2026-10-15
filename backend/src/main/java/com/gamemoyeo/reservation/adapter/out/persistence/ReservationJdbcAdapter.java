@@ -210,12 +210,16 @@ public class ReservationJdbcAdapter implements ReservationPort {
             result.getString("meetup_status"),
             result.getString("session_status"),
             result.getString("closed_reason"),
-            result.getTimestamp("starts_at").toInstant(),
-            result.getTimestamp("recruitment_deadline") == null
-                ? null : result.getTimestamp("recruitment_deadline").toInstant(),
+            utcInstant(result, "starts_at"),
+            utcInstant(result, "recruitment_deadline"),
             result.getInt("capacity"),
             result.getInt("reserved_count"),
             result.getString("reservation_status")
         );
+    }
+
+    private java.time.Instant utcInstant(ResultSet result, String column) throws SQLException {
+        var value = result.getObject(column, java.time.LocalDateTime.class);
+        return value == null ? null : value.toInstant(java.time.ZoneOffset.UTC);
     }
 }

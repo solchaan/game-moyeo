@@ -2,6 +2,11 @@ export type OptionType = 'MODE'|'TIER'|'ROLE'|'PLATFORM'|'REGION'|'MAP'
 export interface Game { id:number; slug:string; name:string; description:string|null; imageUrl:string|null; active:boolean }
 export type Position = 'TOP'|'JUNGLE'|'MID'|'ADC'|'SUPPORT'|'ANY'
 export interface PositionPreferences { primaryPosition:Position|null; secondaryPosition:Position|null }
+export interface PositionAvailability {
+  enabled:boolean; requirementsConfigured:boolean; remainingCapacity:number; unassignedCount:number; anyPositionCount:number;
+  ownerPositions:PositionPreferences;
+  positions:{position:Exclude<Position,'ANY'>;participantCount:number;capacity:number|null;remainingCapacity:number|null;status:'OPEN'|'FILLED'|'CLOSED'|'EMPTY'|'OCCUPIED';includesOwner:boolean}[];
+}
 export interface GamePayload { slug:string; name:string; description:string|null; imageUrl:string|null }
 export interface GameOptionPayload { type:OptionType; code:string; displayName:string; sortOrder:number; metadata:string|null }
 export interface CreateGamePayload extends GamePayload { options:GameOptionPayload[] }

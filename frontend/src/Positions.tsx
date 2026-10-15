@@ -5,7 +5,7 @@ import { getMemberId } from './auth'
 import { t } from './locale'
 import type { PositionPreferences } from './types'
 
-const positions = { TOP: '탑', JUNGLE: '정글', MID: '미드', ADC: '원딜', SUPPORT: '서포터', ANY: '상관없음' }
+export const positions = { TOP: '탑', JUNGLE: '정글', MID: '미드', ADC: '원딜', SUPPORT: '서포터', ANY: '상관없음' }
 export function PositionFields({value, onChange, disabled = false}:{value:PositionPreferences;onChange:(value:PositionPreferences)=>void;disabled?:boolean}) {
   const id=useId()
   return <fieldset disabled={disabled} className="position-fields"><legend>{t('선호 포지션')}</legend>
@@ -36,7 +36,7 @@ function GameProfile({gameId}:{gameId:number}) {
 export function LeagueProfile() {
   const games=useQuery({queryKey:['games'],queryFn:api.games})
   const league=games.data?.find(game=>game.slug==='league-of-legends')
-  return <article className="riot-account-card"><h2>{t('롤 프로필')}</h2><p>{t('소환사의 협곡 참여 신청에 기본값으로 사용됩니다.')}</p>
+  return <article className="riot-account-card" id="league-profile"><p className="lobby-kicker">01 / LEAGUE OF LEGENDS</p><h2>{t('롤 프로필')}</h2><p>{t('소환사의 협곡 참여 신청에 기본값으로 사용됩니다.')}</p>
     {games.isPending?<p role="status">{t('프로필을 불러오는 중...')}</p>:games.error?<div role="alert">{games.error.message}<button onClick={()=>void games.refetch()}>{t('다시 시도')}</button></div>:league?<GameProfile gameId={league.id}/>:<p>{t('롤 프로필을 아직 설정할 수 없습니다.')}</p>}
   </article>
 }
@@ -50,4 +50,16 @@ export function ParticipationForm({meetupId,pending,onSubmit}:{meetupId:number;p
     {defaults.data.enabled&&<><PositionFields value={value} onChange={setDraft} disabled={pending}/><p className="field-help">{t('이번 신청의 포지션을 바꿔도 프로필은 유지됩니다.')}</p></>}
     <button className="primary wide" disabled={pending}>{t(pending?'참여 신청 중...':'참여 신청하기')}</button>
   </form>
+}
+
+export function OwnerPositionPreview({gameId}:{gameId:number}) {
+  const profile=useQuery({queryKey:['game-profile',gameId,getMemberId()],queryFn:()=>api.gameProfile(gameId),gcTime:0})
+  return <div className="owner-position-preview">
+    <p>{t('방장도 정원과 포지션별 인원에 포함됩니다.')}</p>
+    {profile.isPending?<p role="status">{t('프로필을 불러오는 중...')}</p>:profile.error?<div role="alert"><p>{profile.error.message}</p><button type="button" className="secondary" onClick={()=>void profile.refetch()}>{t('다시 시도')}</button></div>:<p>
+      {t('방장 주 포지션')}: <strong>{profile.data.primaryPosition?t(positions[profile.data.primaryPosition]):t('미설정')}</strong>
+      {profile.data.secondaryPosition&&<> · {t('부 포지션')}: {t(positions[profile.data.secondaryPosition])}</>}
+    </p>}
+    <small>{t('모임을 만들 때 프로필의 포지션이 자동으로 저장됩니다.')}</small>
+  </div>
 }
