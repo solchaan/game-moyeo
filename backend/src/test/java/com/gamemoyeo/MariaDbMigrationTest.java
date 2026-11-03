@@ -24,7 +24,7 @@ class MariaDbMigrationTest {
             .load()
             .migrate();
 
-        assertThat(migrationResult.targetSchemaVersion).isEqualTo("16");
+        assertThat(migrationResult.targetSchemaVersion).isEqualTo("22");
 
         try (Connection connection = MARIA_DB.createConnection("");
              Statement statement = connection.createStatement();

@@ -18,6 +18,9 @@ public interface ReservationUseCase {
     ParticipationView state(long meetupId, Long memberId);
 
     void closeDueMeetups();
+    void notifyChange(long meetupId, String kind, String message);
+    void remindUpcoming();
+    void ready(long meetupId, long memberId, boolean ready);
 
     record ParticipationView(
         long meetupId,

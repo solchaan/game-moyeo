@@ -21,18 +21,28 @@ public class ReservationService implements ReservationUseCase {
 
     private final ReservationPort port;
     private final Clock clock;
+    private final com.gamemoyeo.member.application.CommunityUseCase community;
+    private final com.gamemoyeo.reservation.application.port.out.WaitlistPort waitlist;
+    private final com.gamemoyeo.notification.application.NotificationUseCase notifications;
+    private final com.gamemoyeo.reservation.application.port.out.ReservationIdempotencyPort idempotency;
 
     private final ParticipationPreferencesService preferences;
 
     @Autowired
-    public ReservationService(ReservationPort port, ParticipationPreferencesService preferences) {
-        this(port, preferences, Clock.systemUTC());
+    public ReservationService(ReservationPort port, ParticipationPreferencesService preferences,
+        com.gamemoyeo.reservation.application.port.out.ReservationIdempotencyPort idempotency, com.gamemoyeo.notification.application.NotificationUseCase notifications, com.gamemoyeo.reservation.application.port.out.WaitlistPort waitlist, com.gamemoyeo.member.application.CommunityUseCase community) {
+        this(port, preferences, idempotency, notifications, waitlist, community, Clock.systemUTC());
     }
 
-    ReservationService(ReservationPort port, ParticipationPreferencesService preferences, Clock clock) {
+    ReservationService(ReservationPort port, ParticipationPreferencesService preferences,
+        com.gamemoyeo.reservation.application.port.out.ReservationIdempotencyPort idempotency, com.gamemoyeo.notification.application.NotificationUseCase notifications, com.gamemoyeo.reservation.application.port.out.WaitlistPort waitlist, com.gamemoyeo.member.application.CommunityUseCase community, Clock clock) {
         this.port = port;
         this.preferences = preferences;
         this.clock = clock;
+        this.idempotency = idempotency;
+        this.notifications = notifications;
+        this.waitlist = waitlist;
+        this.community = community;
     }
 
     @Override
@@ -56,13 +66,20 @@ public class ReservationService implements ReservationUseCase {
     public ParticipationView participate(long meetupId, long memberId, String idempotencyKey,
         com.gamemoyeo.member.domain.PositionPreferences positions) {
         validateIdempotencyKey(idempotencyKey);
-        ReservationState before = requireLockedState(meetupId, memberId);
+        if (!port.lockMeetup(meetupId)) { throw notFound(); }
+        String operation = "PARTICIPATE:" + meetupId;
+        String payload = positions == null ? "DEFAULT" : String.valueOf(positions.primaryPosition()) + ":" + positions.secondaryPosition();
+        var replay = idempotency.replay(memberId, operation, idempotencyKey, payload);
+        if (replay.isPresent()) { return replay.get(); }
+        ReservationState before = requireState(meetupId, memberId);
         if (before.ownerId() == memberId || "CONFIRMED".equals(before.reservationStatus())) {
-            return view(before, memberId);
+            return remember(memberId, operation, idempotencyKey, payload, view(before, memberId));
         }
         ensureOpen(before);
         var selected = preferences.resolve(meetupId, memberId, positions);
 
+        community.guardAdmission(meetupId, memberId);
+        waitlist.guardAdmission(meetupId, memberId);
         if (!port.claimSeat(meetupId)) {
             ensureOpen(requireState(meetupId, memberId));
             throw new ApiException(HttpStatus.CONFLICT, "RESERVATION_CAPACITY_EXCEEDED",
@@ -71,33 +88,47 @@ public class ReservationService implements ReservationUseCase {
         port.confirmReservation(before.sessionId(), memberId);
         port.savePositions(before.sessionId(), memberId, selected);
         port.closeIfFull(meetupId);
-        return view(requireState(meetupId, memberId), memberId);
+        waitlist.accepted(meetupId, memberId);
+        notifications.publish(List.of(before.ownerId(), memberId), meetupId, "PARTICIPATION", "모임 참가가 확정되었습니다.", null);
+        return remember(memberId, operation, idempotencyKey, payload, view(requireState(meetupId, memberId), memberId));
     }
 
     @Override
     @Transactional
     public ParticipationView cancel(long meetupId, long memberId, String idempotencyKey) {
         validateIdempotencyKey(idempotencyKey);
-        ReservationState before = requireLockedState(meetupId, memberId);
+        if (!port.lockMeetup(meetupId)) { throw notFound(); }
+        String operation = "CANCEL:" + meetupId;
+        String payload = "";
+        var replay = idempotency.replay(memberId, operation, idempotencyKey, payload);
+        if (replay.isPresent()) { return replay.get(); }
+        ReservationState before = requireState(meetupId, memberId);
         if (before.ownerId() == memberId) {
             throw new ApiException(HttpStatus.CONFLICT, "MEETUP_OWNER_CANNOT_CANCEL",
                 "The meetup owner cannot cancel their participation.");
         }
         if (!"CONFIRMED".equals(before.reservationStatus())) {
-            return view(before, memberId);
+            return remember(memberId, operation, idempotencyKey, payload, view(before, memberId));
         }
         if (port.cancelReservation(before.sessionId(), memberId)) {
             port.releaseSeat(meetupId);
             port.reopenIfPossible(meetupId);
+            waitlist.advance(meetupId);
+            notifications.publish(List.of(before.ownerId(), memberId), meetupId, "CANCELLATION", "모임 참가가 취소되었습니다.", null);
         }
-        return view(requireState(meetupId, memberId), memberId);
+        return remember(memberId, operation, idempotencyKey, payload, view(requireState(meetupId, memberId), memberId));
     }
 
     @Override
     @Transactional
     public ParticipationView close(long meetupId, long memberId, String idempotencyKey) {
         validateIdempotencyKey(idempotencyKey);
-        ReservationState before = requireLockedState(meetupId, memberId);
+        if (!port.lockMeetup(meetupId)) { throw notFound(); }
+        String operation = "CLOSE:" + meetupId;
+        String payload = "";
+        var replay = idempotency.replay(memberId, operation, idempotencyKey, payload);
+        if (replay.isPresent()) { return replay.get(); }
+        ReservationState before = requireState(meetupId, memberId);
         if (before.ownerId() != memberId) {
             throw new ApiException(HttpStatus.FORBIDDEN, "MEETUP_OWNER_REQUIRED",
                 "Only the meetup owner can close participation.");
@@ -108,7 +139,7 @@ public class ReservationService implements ReservationUseCase {
         if (isOpen(before)) {
             port.closeByOwner(meetupId, memberId);
         }
-        return view(requireState(meetupId, memberId), memberId);
+        return remember(memberId, operation, idempotencyKey, payload, view(requireState(meetupId, memberId), memberId));
     }
 
     @Override
@@ -120,6 +151,31 @@ public class ReservationService implements ReservationUseCase {
     @Transactional
     public void closeDueMeetups() {
         port.closeDueMeetups();
+    }
+
+    @Override
+    @Transactional
+    public void notifyChange(long meetupId, String kind, String message) {
+        notifications.publish(port.confirmedMembers(meetupId), meetupId, kind, message, null);
+    }
+
+    @Override
+    @Transactional
+    public void remindUpcoming() {
+        for (var reminder : port.reminders()) {
+            notifications.publish(port.confirmedMembers(reminder.meetupId()), reminder.meetupId(), "REMINDER",
+                "모임 시작이 30분 이내로 다가왔습니다. 일정을 확인해 주세요.", reminder.startsAt().toString());
+        }
+    }
+
+    @Override
+    @Transactional
+    public void ready(long meetupId, long memberId, boolean ready) {
+        var state = requireLockedState(meetupId, memberId);
+        if (!"CONFIRMED".equals(state.reservationStatus()) || !state.startsAt().isAfter(clock.instant())) {
+            throw new ApiException(HttpStatus.CONFLICT, "READINESS_NOT_AVAILABLE", "Only upcoming participants can update readiness.");
+        }
+        port.ready(state.sessionId(), memberId, ready);
     }
 
     private ParticipationView view(ReservationState state, Long memberId) {
@@ -202,10 +258,15 @@ public class ReservationService implements ReservationUseCase {
     }
 
     private void validateIdempotencyKey(String key) {
-        if (key == null || key.isBlank() || key.length() > 100) {
+        if (key == null || key.isBlank() || key.length() > 100 || !key.equals(key.strip())) {
             throw new ApiException(HttpStatus.BAD_REQUEST, "INVALID_IDEMPOTENCY_KEY",
                 "Idempotency-Key must contain between 1 and 100 characters.");
         }
+    }
+
+    private ParticipationView remember(long memberId, String operation, String key, String payload, ParticipationView result) {
+        idempotency.save(memberId, operation, key, payload, result);
+        return result;
     }
 
     private ApiException notFound() {

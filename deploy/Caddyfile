@@ -42,3 +42,9 @@
 {$APP_SITE_ADDRESS:http://localhost} {
 	import app
 }
+
+# Mumak shares the existing HTTPS entry point.
+mumak.noroo.kr {
+	encode zstd gzip
+	reverse_proxy mumak-web:80
+}

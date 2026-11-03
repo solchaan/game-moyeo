@@ -3,8 +3,8 @@ name: game-moyeo-app
 services:
   caddy:
     build:
-      context: .
-      dockerfile: frontend/Dockerfile
+      context: ${FRONTEND_DIR:-../game-moyeo-front}
+      dockerfile: Dockerfile
     restart: unless-stopped
     ports:
       - "127.0.0.1:${APP_HTTP_PORT:-5173}:80"

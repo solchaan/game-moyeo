@@ -31,7 +31,7 @@ class ReservationServiceTest {
         var preferences = mock(ParticipationPreferencesService.class);
         when(preferences.resolve(org.mockito.ArgumentMatchers.anyLong(), org.mockito.ArgumentMatchers.anyLong(),
             org.mockito.ArgumentMatchers.any())).thenReturn(com.gamemoyeo.member.domain.PositionPreferences.empty());
-        service = new ReservationService(port, preferences, Clock.fixed(NOW, ZoneOffset.UTC));
+        service = new ReservationService(port, preferences, mock(com.gamemoyeo.reservation.application.port.out.ReservationIdempotencyPort.class), mock(com.gamemoyeo.notification.application.NotificationUseCase.class), mock(com.gamemoyeo.reservation.application.port.out.WaitlistPort.class), mock(com.gamemoyeo.member.application.CommunityUseCase.class), Clock.fixed(NOW, ZoneOffset.UTC));
     }
 
     @Test

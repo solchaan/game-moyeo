@@ -32,6 +32,10 @@ public interface ReservationPort {
     boolean closeByOwner(long meetupId, long ownerId);
 
     void closeDueMeetups();
+    void ready(long sessionId, long memberId, boolean ready);
+    java.util.List<Long> confirmedMembers(long meetupId);
+    java.util.List<Reminder> reminders();
+    record Reminder(long meetupId, Instant startsAt) { }
 
     record ReservationState(
         long meetupId,

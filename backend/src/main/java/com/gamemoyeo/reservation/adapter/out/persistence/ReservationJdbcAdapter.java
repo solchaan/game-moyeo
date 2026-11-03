@@ -127,7 +127,7 @@ public class ReservationJdbcAdapter implements ReservationPort {
     public boolean cancelReservation(long sessionId, long memberId) {
         return jdbc.update("""
             UPDATE reservation
-            SET status = 'CANCELLED', cancelled_at = UTC_TIMESTAMP(6)
+            SET status = 'CANCELLED', ready = FALSE, cancelled_at = UTC_TIMESTAMP(6)
             WHERE session_id = ? AND member_id = ? AND status = 'CONFIRMED'
             """, sessionId, memberId) == 1;
     }
@@ -200,6 +200,24 @@ public class ReservationJdbcAdapter implements ReservationPort {
                       AND meetup.recruitment_deadline <= UTC_TIMESTAMP(6))
               )
             """);
+    }
+
+    @Override
+    public void ready(long sessionId, long memberId, boolean ready) {
+        jdbc.update("UPDATE reservation SET ready=? WHERE session_id=? AND member_id=? AND status='CONFIRMED'", ready, sessionId, memberId);
+    }
+    @Override
+    public java.util.List<Long> confirmedMembers(long meetupId) {
+        return jdbc.queryForList("SELECT r.member_id FROM reservation r JOIN meetup_session s ON s.id=r.session_id WHERE s.meetup_id=? AND r.status='CONFIRMED'", Long.class, meetupId);
+    }
+    @Override
+    public java.util.List<Reminder> reminders() {
+        return jdbc.query("""
+            SELECT m.id,s.starts_at FROM meetup m JOIN meetup_session s ON s.meetup_id=m.id
+            WHERE m.status<>'DELETED' AND s.starts_at>UTC_TIMESTAMP(6)
+            AND s.starts_at<=DATE_ADD(UTC_TIMESTAMP(6),INTERVAL 30 MINUTE)
+            ORDER BY s.starts_at,m.id LIMIT 1000
+            """, (row, index) -> new Reminder(row.getLong(1), row.getObject(2, java.time.LocalDateTime.class).toInstant(java.time.ZoneOffset.UTC)));
     }
 
     private ReservationState mapState(ResultSet result, int rowNumber) throws SQLException {

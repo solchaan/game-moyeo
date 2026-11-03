@@ -5,7 +5,6 @@
 ```text
 gameMoyeo/
 ├── backend/             # Spring Boot, Gradle, Flyway, JPA, jOOQ
-├── frontend/            # React, TypeScript, Vite
 ├── scripts/             # 루트 실행 및 하네스 검사
 ├── docs/                # 아키텍처 문서
 ├── compose.yml          # 로컬 MariaDB, Redis, Kafka
@@ -51,21 +50,18 @@ cd backend
 
 ## Frontend
 
-React 프런트엔드는 `frontend` 디렉터리에 있습니다. 백엔드를 8080 포트에서 실행한 뒤 별도 터미널에서 시작합니다.
+프론트엔드는 별도 [game-moyeo-front](https://github.com/solchaan/game-moyeo-front) 저장소에서 관리합니다.
+이 저장소와 같은 상위 디렉터리에 체크아웃하세요.
 
 ```bash
-cd frontend
-npm install
+git clone https://github.com/solchaan/game-moyeo-front.git ../game-moyeo-front
+cd ../game-moyeo-front
+npm ci
 npm run dev
 ```
 
-개발 서버는 `http://localhost:5173`에서 실행되며 `/api`와 `/oauth2` 요청을 백엔드로 프록시합니다. 다른 API 주소를 사용하는 배포 환경에서는 `VITE_API_BASE_URL`을 설정합니다.
-
-```bash
-cp frontend/.env.example frontend/.env
-```
-
-현재 UI는 게임 목록·상세, 모임 목록·상세·생성·수정·삭제, 소셜 로그인 콜백을 지원합니다. 참여 신청/예약은 백엔드 예약 API가 추가된 뒤 연결할 수 있도록 상세 화면에서 비활성 상태로 표시합니다.
+개발 서버는 `http://localhost:5173`에서 실행되며 API 요청을 localhost:8080으로 프록시합니다.
+다른 위치에 체크아웃한 경우 Compose 실행 전에 `FRONTEND_DIR`을 프론트 저장소의 절대 경로로 지정하세요.
 
 ## Caddy + Docker 실행
 
@@ -128,17 +124,12 @@ JWT secret이 변경되면 기존 사용자는 다시 로그인해야 합니다.
 
 ## GitHub Actions 자동 배포
 
-`.github/workflows/pipeline.yml`은 `main`의 push, pull request, 수동 실행에서
-백엔드와 프론트엔드 검사를 병렬로 실행합니다. 각각의 상세 구성은 `backend.yml`,
-`frontend.yml`에 있습니다.
-
-- 백엔드: Java 21 테스트, Docker 기반 마이그레이션·60명 동시 예약 테스트,
-  앱 기동과 Flyway 적용, jOOQ 생성·컴파일, 백엔드 Docker 이미지 빌드.
-- 프론트엔드: npm 설치, TypeScript 검사·빌드, Caddy 이미지 빌드·설정 검증,
-  데스크톱·태블릿·모바일 Playwright 브라우저 검사.
-- 배포: 두 검사 모두 성공한 `solchaan/game-moyeo`의 최신 `main` 커밋만
-  `game-moyeo-deploy` 라벨의 Apple Silicon Mac runner에서 배포합니다.
-  PR에서는 GitHub 제공 Ubuntu runner로 검사만 실행합니다.
+`.github/workflows/pipeline.yml`은 백엔드 테스트와 이미지 빌드 후 Mac runner에서 배포합니다.
+프론트 빌드·Caddy 검증·Playwright 검사는 game-moyeo-front의 GitHub Actions에서 실행합니다.
+배포 시 game-moyeo-front의 main을 `.runtime/game-moyeo-front`에 체크아웃해 함께 빌드합니다.
+프론트 저장소가 비공개라면 game-moyeo의 Actions secret `FRONTEND_REPO_TOKEN`에 해당 저장소 contents:read 권한의 토큰이 필요합니다.
+프론트 변경을 먼저 push하고 프론트 CI 성공을 확인한 뒤 이 저장소의 배포 워크플로를 실행하세요.
+프론트 push 자체는 서비스 배포를 실행하지 않습니다.
 
 현재 Mac의 runner 등록은 다음 명령으로 수행합니다. GitHub 로그인에는 해당 저장소의
 runner를 관리할 권한이 필요합니다. 만료된 인증은 먼저 갱신합니다.
@@ -167,7 +158,7 @@ DB 볼륨은 유지하며 DB 마이그레이션은 자동으로 되돌리지 않
 이전 앱과 호환되도록 작성해야 합니다. 단일 인스턴스 교체 중에는 짧은 접속 중단이 발생합니다.
 백업에는 사용자 데이터가 포함되므로 로컬 권한을 제한하고 별도의 보관 주기를 적용하세요.
 
-프론트엔드 브라우저 검사는 `cd frontend && npm run test:e2e`로 실행합니다.
+프론트엔드 브라우저 검사는 `cd ../game-moyeo-front && npm run test:e2e`로 실행합니다.
 처음에는 `npx playwright install chromium`이 필요합니다. 실행 중인 Caddy에 대해 검사하려면
 `PLAYWRIGHT_BASE_URL=http://127.0.0.1:5173 npm run test:e2e`를 사용합니다.
 브라우저 테스트의 API 응답은 테스트 안에서만 대체하며 실제 DB를 수정하지 않습니다.
@@ -188,8 +179,8 @@ ADMIN_PASSWORD='관리자 비밀번호' \
 
 - 백엔드와 저장소 공통 규칙: `AGENTS.md`
 - Spring Boot 프로젝트: `backend/`
-- React 프론트엔드 규칙: `frontend/AGENTS.md`
-- 전체 하네스 검사: `./scripts/check-ai-harness.sh`
+- React 프론트엔드 규칙: 별도 game-moyeo-front의 `AGENTS.md`
+- 백엔드 하네스 검사: `./scripts/check-ai-harness.sh`
 
 
 ### 공유기 포트포워딩으로 도메인 공개

@@ -19,13 +19,9 @@ jobs:
     name: Backend
     uses: ./.github/workflows/backend.yml
 
-  frontend:
-    name: Frontend
-    uses: ./.github/workflows/frontend.yml
-
   deploy:
     name: Deploy to Mac
-    needs: [backend, frontend]
+    needs: [backend]
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && github.repository == 'solchaan/game-moyeo'
     runs-on: [self-hosted, macOS, ARM64, game-moyeo-deploy]
     timeout-minutes: 30
@@ -37,6 +33,14 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
+          persist-credentials: false
+      - name: Check out frontend repository
+        uses: actions/checkout@v6
+        with:
+          repository: solchaan/game-moyeo-front
+          ref: main
+          path: .runtime/game-moyeo-front
+          token: ${{ secrets.FRONTEND_REPO_TOKEN || github.token }}
           persist-credentials: false
       - name: Check this is still the latest main commit
         id: latest
@@ -51,4 +55,6 @@ jobs:
           fi
       - name: Build, back up and deploy containers
         if: steps.latest.outputs.deploy == 'true'
+        env:
+          FRONTEND_DIR: ${{ github.workspace }}/.runtime/game-moyeo-front
         run: bash scripts/deploy-containers.sh

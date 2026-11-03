@@ -67,6 +67,15 @@ public class ReservationController {
         return useCase.close(meetupId, memberId(jwt), idempotencyKey);
     }
 
+    @io.swagger.v3.oas.annotations.Operation(summary = "참가 준비 상태 변경")
+    @org.springframework.web.bind.annotation.PutMapping("/readiness")
+    org.springframework.http.ResponseEntity<Void> ready(@PathVariable long meetupId,
+        @AuthenticationPrincipal Jwt jwt, @jakarta.validation.Valid @org.springframework.web.bind.annotation.RequestBody ReadyRequest request) {
+        useCase.ready(meetupId, memberId(jwt), request.ready());
+        return org.springframework.http.ResponseEntity.noContent().build();
+    }
+    record ReadyRequest(@jakarta.validation.constraints.NotNull Boolean ready) { }
+
     private long memberId(Jwt jwt) {
         if (jwt == null) {
             throw new ApiException(HttpStatus.UNAUTHORIZED, "AUTHENTICATION_REQUIRED",

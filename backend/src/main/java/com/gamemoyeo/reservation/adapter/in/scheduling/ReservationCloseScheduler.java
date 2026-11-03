@@ -5,6 +5,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Component
+@org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(name="spring.task.scheduling.enabled", havingValue="true", matchIfMissing=true)
 public class ReservationCloseScheduler {
 
     private final ReservationUseCase useCase;
@@ -16,5 +17,6 @@ public class ReservationCloseScheduler {
     @Scheduled(fixedDelayString = "${app.reservation.close-check-delay:15000}")
     public void closeDueMeetups() {
         useCase.closeDueMeetups();
+        useCase.remindUpcoming();
     }
 }

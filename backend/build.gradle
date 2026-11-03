@@ -118,3 +118,8 @@ tasks.withType(JavaCompile).configureEach {
     options.release = 21
     options.compilerArgs += ['-parameters']
 }
+
+// Generated jOOQ sources follow the generator's formatting, not handwritten source rules.
+tasks.named('checkstyleMain') {
+    source = fileTree('src/main/java')
+}

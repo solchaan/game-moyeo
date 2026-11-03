@@ -42,13 +42,16 @@ public class MeetupBoardService implements MeetupBoardUseCase {
     @Transactional
     public MeetupView update(long meetupId, long ownerId, MeetupCommand command) {
         validate(command);
-        return port.update(meetupId, ownerId, command);
+        MeetupView updated = port.update(meetupId, ownerId, command);
+        reservation.notifyChange(meetupId, "MEETUP_CHANGED", "모임 일정 또는 모집 조건이 변경되었습니다. 상세 내용을 확인해 주세요.");
+        return updated;
     }
 
     @Override
     @Transactional
     public void delete(long meetupId, long ownerId) {
         port.delete(meetupId, ownerId);
+        reservation.notifyChange(meetupId, "MEETUP_DELETED", "참여하던 모임이 취소되었습니다.");
     }
 
     @Override
